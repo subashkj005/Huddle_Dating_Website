@@ -8,8 +8,10 @@ from app.config.settings import get_settings
 
 settings = get_settings()
 
+
 class EmailSchema(BaseModel):
     email: List[EmailStr]
+
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.EMAIL_ADDRESS,
@@ -23,7 +25,6 @@ conf = ConnectionConfig(
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True
 )
-
 
 
 async def send_email_with_otp(email: List[EmailStr], otp: str) -> JSONResponse:
@@ -41,9 +42,7 @@ async def send_email_with_otp(email: List[EmailStr], otp: str) -> JSONResponse:
 
     # Send email
     fm = FastMail(conf)
-    
+
     await fm.send_message(message)
-    
 
     return JSONResponse(status_code=200, content={"message": "Email with OTP has been sent"})
-

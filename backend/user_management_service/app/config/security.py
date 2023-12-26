@@ -9,7 +9,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app.config.settings import get_settings
 from app.config.database import db_dependency
-from app.models import User
+from app.models.models import User
 
 SPECIAL_CHARECTERS = ["!","@","#","$","%","^","&","*","+","=","_","-","(",")","?","/","|"]
 

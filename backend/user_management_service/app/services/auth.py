@@ -1,6 +1,6 @@
 from datetime import timedelta
 from fastapi import HTTPException
-from app.models import User
+from app.models.models import User
 from app.config.database import db_dependency
 from app.config.security import create_access_token, create_refresh_token, \
     get_token_payload, verify_password
@@ -8,6 +8,14 @@ from app.config.settings import get_settings
 from app.response.auth import TokenResponse
 
 settings = get_settings()
+
+# Fuctions:-
+
+# Verify User Access(User)
+# Get User's token(User, refresh_token=None)
+# Get google login token(data, db)
+# Get User login token(User)
+# Get refresh token(token, db)
 
 
 def _verify_user_access(user: User):
@@ -29,12 +37,12 @@ async def _get_user_token(user: User, refresh_token=None):
         refresh_token = create_refresh_token(payload)
 
     return TokenResponse(access_token=access_token,
-                         refresh_token=refresh_token,
+                        refresh_token=refresh_token,
                          expires_in=access_token_expiry.seconds,  # In seconds
                          )
 
 
-async def get_token(data, db: db_dependency):
+async def get_google_login_token(data, db: db_dependency):
 
     user = db.query(User).filter(User.email == data.username).first()
 
@@ -55,6 +63,13 @@ async def get_token(data, db: db_dependency):
     _verify_user_access(user=user)
 
     return await _get_user_token(user=user)
+
+
+async def get_user_login_token(user: User):
+    token_response = await _get_user_token(user)
+    return token_response
+    
+    
 
 
 async def get_refresh_token(token, db):

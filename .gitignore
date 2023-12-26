@@ -22,6 +22,8 @@ htmlcov/
 *.pyz
 
 # Node.js
+/.pnp
+.pnp.js
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -73,3 +75,8 @@ db.sqlite3
 .Trashes
 ehthumbs.db
 Thumbs.db
+/backend/user_management_service/.env
+/backend/user_management_service/alembic/
+/backend/user_management_service/alembic.ini
+/backend/api_gateway/api_venv/
+/backend/api_gateway/.env

@@ -1,35 +1,34 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
 from starlette.responses import JSONResponse
 from app.config.database import db_dependency
-from app.schemas import RegisterUserRequest, OTPRequest, UserLoginRequest
-from app.responses import UserResponse
-from app.models import User
-from app.config.security import generate_otp, get_current_user, hash_password,\
-                                is_password_strong_enough, verify_password, oauth2_scheme
+from app.schemas.schemas import RegisterUserRequest, OTPRequest, UserLoginRequest
+from app.models.models import User
+from app.services.auth import get_user_login_token
+from app.config.security import generate_otp, hash_password, \
+    is_password_strong_enough, verify_password, oauth2_scheme
 from app.redis.config import redis_instance
-from app.fastmail.config import send_email_with_otp
 from app.redis.controller import RedisController
 
 
 # Routes for those invalid urls
 user_router = APIRouter(
     prefix='/users',
-    tags=['Guest User'],
+    tags=['Users'],
     responses={404: {"description": "Not found"}},
     dependencies=[Depends(oauth2_scheme)]
 )
 
 
 guest_router = APIRouter(
-    prefix='/users',
-    tags=['Users'],
+    prefix='/public',
+    tags=['Public'],
     responses={404: {"description": "Not found"}},
 )
 
 
 @guest_router.post("/signup", status_code=status.HTTP_200_OK)
 async def user_signup(user: RegisterUserRequest, db: db_dependency):
+
     # Check if passwords match
     if user.password != user.confirm_password:
         return JSONResponse(status_code=400, content={"message": "Passwords do not match"})
@@ -48,17 +47,27 @@ async def user_signup(user: RegisterUserRequest, db: db_dependency):
     user_key = f"temp_user:{user.email}"
 
     otp = generate_otp()
+    
+    print('=============================')
+    print(f"OTP: {otp}")
+    print('=============================')
 
     user_data = {"email": user.email, "password": hashed_password, "otp": otp}
 
-    if redis_instance.exists(user_key):
-        redis_instance.hset(user_key, mapping=user_data)
-    else:
-        redis_instance.hmset(user_key, mapping=user_data)
+    try:
+        if redis_instance.exists(user_key):
+            redis_instance.hset(user_key, mapping=user_data)
+        else:
+            redis_instance.hmset(user_key, mapping=user_data)
 
-    redis_instance.expire(user_key, 200)
+        redis_instance.expire(user_key, 240)
+    except Exception as e:
+        print('=============================')
+        print(f"Redis Connection ERROR: {e}")
+        print('=============================')
+        return JSONResponse(status_code=502, content={"message": "Server Issue, services will be available soon..!"})
 
-    await send_email_with_otp([user.email], str(otp))
+    # await send_email_with_otp([user.email], str(otp))
 
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Email sent successfully"})
 
@@ -75,7 +84,13 @@ async def otp_confimation(data: OTPRequest, db: db_dependency):
         return JSONResponse(status_code=400, content={"message": "OTP Expired"})
 
     user_details = result["data"]
+    
+    if not user_details:
+        return JSONResponse(status_code=400, content={"message": "OTP Expired"})
 
+    if user_details["email"] != data.email or user_details["otp"] != data.otp:
+        return JSONResponse(status_code=400, content={"message": "Invalid OTP"})
+    
     if data.otp is not None:
         if user_details["otp"] == data.otp:
             user = User(email=user_details["email"],
@@ -104,8 +119,10 @@ async def user_login(data: UserLoginRequest, db: db_dependency):
     if not user.is_active:
         raise HTTPException(
             status_code=400, detail="Your account has been dactivated. Please contact support.")
-        
-        
+
+    return await get_user_login_token(user)
+
+
 @user_router.post('/me', status_code=status.HTTP_200_OK)
 def get_user_detail(request: Request):
     return request.user

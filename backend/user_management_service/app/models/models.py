@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum
 from sqlalchemy.ext.declarative import declarative_base
-from geoalchemy2 import Geometry
 from sqlalchemy.sql import func
+from app.models.enums import Gender, InterestedIn, EducationalLevel
 
 
 Base = declarative_base()
@@ -18,9 +18,11 @@ class User(Base):
     height = Column(Integer, nullable=True) 
     weight = Column(Integer, nullable=True)
     location = Column(String(255), nullable=True)
+    gender = Column(Enum(Gender), nullable=True )
     geolocation = Column(String(255), nullable=True)
     bio = Column(Text, nullable=True)
-    education_level = Column(String(255), nullable=True)
+    education_level = Column(Enum(EducationalLevel), nullable=True)
+    interested_in = Column(Enum(InterestedIn), nullable=True)
     super_likes = Column(Integer, default=0)
     followers = Column(Integer, default=0)
     following = Column(Integer, default=0)
@@ -32,6 +34,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=True, default=None, server_default=func.now(), onupdate=func.now())
     role = Column(String(100), default='user')
+    
+      
     
     
     
