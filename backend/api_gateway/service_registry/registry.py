@@ -3,12 +3,12 @@ USER_SERVICE = "user-service"
 
 
 public_services = {
-    "public": "http://localhost:7614/public/",
+    "public": "http://localhost:7614/",
 }
 
 
 protected_services = {
-    "users": "http://localhost:7614/users/",
+    "users": "http://localhost:7614/",
 }
 
 

@@ -8,8 +8,11 @@ app = Flask(__name__)
 
 # Cors headers
 cors = CORS(app, 
-            resources={r"/*": {"origins": "http://localhost:3000"}},
-            methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'])
+            resources={r"/*": {"origins": ["http://localhost", "http://localhost:3000"]}},
+            methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+            supports_credentials=True,
+            allow_headers=['Content-Type']
+            )
 
 
 # Routes

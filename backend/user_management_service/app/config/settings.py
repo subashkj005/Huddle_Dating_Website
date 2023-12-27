@@ -15,6 +15,9 @@ class Settings(BaseSettings):
 
     # App
     APP_NAME: str = os.environ.get("APP_NAME", "UserManagementService")
+    
+    # Frontend 
+    FRONTEND_HOST: str = os.environ.get("FRONTEND_HOST", 'http://localhost:3000')
 
     # MySQL
     MYSQL_HOST: str = os.environ.get("MYSQL_HOST", 'localhost')

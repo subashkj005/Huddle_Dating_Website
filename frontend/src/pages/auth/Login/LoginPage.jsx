@@ -2,11 +2,11 @@ import React, {useState} from 'react'
 import  '../../../assets/styles/authStyles.css'
 import img from '../../../assets/front-image.jpg'
 import logo from '../../../assets/images/logo_png_hd-cropped.png'
-import axios from 'axios'
 import { Link, useNavigate } from "react-router-dom";
 import { Alert } from '@mui/material';
 import { PUBLIC_URL, USERS_URL } from '../../../constants/urls'
 import { isPasswordStrongEnough } from '../../../utils/auth/passwordStrength'
+import axiosInstance from '../../../axios/axiosInstance'
 
 
 
@@ -38,7 +38,7 @@ function LoginPage() {
             password: password
         }
 
-        axios.post(`${PUBLIC_URL}/login`, data)
+        axiosInstance.post(`${PUBLIC_URL}/login`, data, { withCredentials: true })
         .then(res=>{
             console.log('login success', res)
             if (res.status == '200') {

@@ -4,8 +4,10 @@ import datetime
 from jose import ExpiredSignatureError, JWTError, jwt
 from config.settings import get_settings
 from services.logger import logger
+from redis_connection.controller import RedisController
 
 settings = get_settings()
+redis = RedisController()
 
 
 def create_new_access_token(refresh_token):
@@ -30,14 +32,25 @@ def create_access_token(data):
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
-def validate_token(access_token, refresh_token):
+def get_refresh_token_from_redis(payload):
+    key = "ref_token" + str(payload['id'])
+    res = redis.get_data(key)
+    if res['status'] == 'success':
+        logger.info(f'Refresh token with key: {key} retrieved successfully')
+        return res['data']
+    else:
+        logger.error(f'Refresh token with key: {key} failed to retrieve')
+    return None
+
+
+def validate_token(access_token):
     try:
         payload = jwt.decode(access_token, settings.JWT_SECRET,
                              algorithms=settings.JWT_ALGORITHM)
         return None, payload
     except ExpiredSignatureError:
         logger.error('Access token expired')
-        return create_new_access_token(refresh_token)
+        return get_refresh_token_from_redis(payload), payload
     except JWTError as e:
         logger.error("Error decoding token: %s", {e})
         return None, None

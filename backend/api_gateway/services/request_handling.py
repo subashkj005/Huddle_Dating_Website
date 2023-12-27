@@ -6,7 +6,8 @@ from services.logger import logger
 
 def construct_url(path):
     service_name = path.split('/')[0]
-    return get_service_url(service_name) + path.split('/', 1)[1]
+    # return get_service_url(service_name) + path.split('/', 1)[1]
+    return get_service_url(service_name) + path
 
 
 def forward_request(request, path):
@@ -26,7 +27,11 @@ def forward_request(request, path):
         response = requests.request(
             method=method, url=url, headers=headers, data=data, params=params, files=files)
         
-        logger.info(f"Forwarded request to {url} with status code: {response.status_code}")
+        if response.status_code == 200:
+            logger.info(f"Forwarded request to {url} with status code: {response.status_code}")
+        else:
+            logger.error(f"Forward request: {url} FAILED.. with status code: {response.status_code}")
+            
 
         # Return the response from the second server to the original client
         return response
@@ -40,6 +45,8 @@ def create_flask_response(res):
     content = res.content
     status_code = res.status_code
     headers = dict(res.headers)
+    
+    logger.info(f"API Response headers {headers}")
     
     # Create a Flask response
     flask_response = Response(content, status=status_code, headers=headers)

@@ -11,3 +11,9 @@ profile_router = APIRouter(
 @profile_router.post('update/')
 async def create_profile(request: Request, db:db_dependency):
     data = request.json()
+    
+    
+    
+@profile_router.get('/checking')
+async def create_profile():
+    return "Authentication Working"

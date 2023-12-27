@@ -1,13 +1,17 @@
 from datetime import timedelta
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from app.models.models import User
 from app.config.database import db_dependency
 from app.config.security import create_access_token, create_refresh_token, \
     get_token_payload, verify_password
 from app.config.settings import get_settings
+from app.redis.controller import RedisController
+from app.logger.config import logger
 from app.response.auth import TokenResponse
 
 settings = get_settings()
+redis = RedisController()
 
 # Fuctions:-
 
@@ -16,6 +20,16 @@ settings = get_settings()
 # Get google login token(data, db)
 # Get User login token(User)
 # Get refresh token(token, db)
+
+
+def set_refresh_token(token, payload):
+    key = "ref_token" + str(payload['id'])
+    res = redis.set_data(key=key, value=token)
+    if res['status'] == 'success':
+        logger.info(f'Refresh token with key: {key} set successfully')
+    else:
+        logger.error(f'Refresh token with key: {key} failed to set')
+    return
 
 
 def _verify_user_access(user: User):
@@ -35,11 +49,9 @@ async def _get_user_token(user: User, refresh_token=None):
 
     if not refresh_token:
         refresh_token = create_refresh_token(payload)
+        set_refresh_token(refresh_token, payload)
 
-    return TokenResponse(access_token=access_token,
-                        refresh_token=refresh_token,
-                         expires_in=access_token_expiry.seconds,  # In seconds
-                         )
+    return access_token
 
 
 async def get_google_login_token(data, db: db_dependency):
@@ -66,14 +78,16 @@ async def get_google_login_token(data, db: db_dependency):
 
 
 async def get_user_login_token(user: User):
-    token_response = await _get_user_token(user)
-    return token_response
-    
-    
+    access_token = await _get_user_token(user)
+    response = JSONResponse(
+        content={"message": "User Login Successful"}, status_code=200)
+    response.set_cookie(
+        'access_token', access_token, httponly=True, samesite='None', secure=True, path='/')
+    return response
 
 
 async def get_refresh_token(token, db):
-    
+
     payload = get_token_payload(token=token)
     user_id = payload.get('id', None)
 
