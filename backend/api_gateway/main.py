@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5001, debug=True,  use_reloader=True)
 
 
-# Assuming you have defined the 'settings' object
+

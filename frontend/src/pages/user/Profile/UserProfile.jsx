@@ -1,35 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import BasicNavbar from "../../../components/navbar/BasicNavbar";
-import { FaPlus } from "react-icons/fa6";
 import ImageUpload from "../../../components/imageUpload/ImageUpload";
 import { createFormData } from "../../../utils/fileManagement/fileUpload";
-import axios from "axios";
-import { USERS_URL } from "../../../constants/urls";
+import axiosInstance from "../../../axios/axiosInstance";
+import { IMAGE_URL, USERS_URL } from "../../../constants/urls";
+import { toast } from "react-toastify";
+import {toast as hottoast} from 'react-hot-toast';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  RiAddLine,
+  RiArrowDownSFill,
+  RiPencilLine,
+  RiCloseCircleLine,
+  RiCheckLine,
+} from "@remixicon/react";
+import { LoadingContext } from "../../../context/LoadingContext";
+import { useSelector } from "react-redux";
+import validateImage from "../../../utils/fileManagement/imageValidations";
 
 function UserProfile() {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone_number: "",
-    date_of_birth: "",
-    gender: "",
-    interested_in: "",
-    educational_level: "",
-    work: "",
-  });
-  const {
-    name,
-    phone_number,
-    date_of_birth,
-    gender,
-    interested_in,
-    educational_level,
-    work,
-  } = formData;
+  const { showLoading, hideLoading } = useContext(LoadingContext);
+  const user_id = useSelector((state) => state.logUser.user.id);
+  const [data, setData] = useState(null);
+
+  const [formData, setFormData] = useState({});
+
+  const [prompts, setPrompts] = useState([])
   const [images, setImages] = useState([]);
   const [imagesLink, setImagesLink] = useState([]);
+  const [profile_picture, setProfilePicture] = useState(null);
+  const [profileLink, setProfileLink] = useState(null);
+  const [tempPrompt, setTempPrompt] = useState('');
+  const [isPromptEdit, setIsPromptEdit] = useState(false);
+  const [editingPromptId, setEditingPromptId] = useState(null);
 
-  const handleImageChange = (event) => {
+  const handleProfileImageChange = (event) => {
     const file = event.target.files[0];
+    const validation = validateImage(file);
+
+    if (!validation.valid) {
+        toast.warning(validation.message);
+        return;
+    }
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(file);
+        setProfileLink(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryImageChange = (event, index) => {
+    
+    const file = event.target.files[0];
+    const validation = validateImage(file);
+
+    if (!validation.valid) {
+        toast.warning(validation.message);
+        return;
+    }
 
     if (file) {
       const reader = new FileReader();
@@ -37,46 +69,150 @@ function UserProfile() {
         const newImages = [...images];
         const newImagesLink = [...imagesLink];
 
-        newImages[newImages.length] = file;
-        setImages(newImages);
+        if (index !== undefined && index !== null) {
+          console.log('index is getting')
+          newImages[index].image = file
+          newImagesLink[index] = reader.result;
+          
+        } else {
 
-        newImagesLink[newImagesLink.length] = reader.result;
+          const newImage_obj = {id: uuidv4(), image: file}
+          newImages[newImages.length] = newImage_obj
+          newImagesLink[newImagesLink.length] = reader.result;
+        }
+
+        setImages(newImages);
         setImagesLink(newImagesLink);
-        console.log("images", images);
+        console.log(images, 'images')
       };
       reader.readAsDataURL(file);
     }
+    console.log(imagesLink, 'imagesLink')
   };
 
   const handleValueChange = (e) => {
+
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
+  
+    setFormData((prevData) => {
+
+      const prevWorks = prevData.works || [];
+  
+      if (name === "title" || name === "company") {
+        console.log('getting inside checking function');
+        return {
+          ...prevData,
+          works: [
+            {
+              title: name === "title" ? value : prevWorks[0]?.title || data.works.title || "",
+              company: name === "company" ? value : prevWorks[0]?.company || data.works.company || "",
+            },
+          ],
+        };
+      } else {
+        return {
+          ...prevData,
+          [name]: value,
+        };
+      }
     });
+  
+    console.log('formdata updated = ', formData);
   };
+  
+  
+  
+
+  const editPrompt = (prompt, index) => {
+    setTempPrompt(prompt);
+    setIsPromptEdit(true);
+    setEditingPromptId(index);
+  };
+
+  const addPrompt = () => {
+    if (prompts.length == 3) {
+      toast.warning("Maximum prompts reached");
+      setTempPrompt("");
+      console.log(prompts, "prompts");
+      return;
+    }
+    const trimmedValue = String(tempPrompt).trim();
+    if (trimmedValue === "" || tempPrompt == null) {
+      return false;
+    }
+    prompts.push({ prompt: tempPrompt });
+    setFormData((prevData)=>({...prevData, prompts: prompts}))
+    setTempPrompt("");
+    console.log('FORMDATA ==', formData)
+  };
+
+  const updatePrompt = (index) => {
+    const updatedPrompts = prompts.map((item, i) =>
+      i === index ? { ...item, prompt: tempPrompt.prompt } : item
+    );
+  
+    setPrompts(updatedPrompts);
+    setFormData((prevData)=>({...prevData, prompts: updatedPrompts}))
+    setIsPromptEdit(false);
+    setEditingPromptId(null);
+    console.log('FORMDATA ==', formData)
+  };
+
+  const deletePrompt = (index) => {
+  setPrompts((prevPrompts) => prevPrompts.filter((item, i) => i !== index));
+  setFormData((prevData)=>({...prevData, prompts: prompts}))
+  toast.success("Prompt deleted successfully");
+  console.log('FORMDATA ==', formData)
+};
+
 
   const handleSubmit = () => {
-    if (
-      !name ||
-      !date_of_birth ||
-      !gender ||
-      !interested_in
-    ) {
-      return null;
-    }
+    // if ((!formData.name || !data.user.name) || (!formData.date_of_birth || !data.user.date_of_birth) || (!formData.gender || !data.user.gender) || (!formData.interested_in || !data.user.interested_in)) {
+    //   toast.warning("Enter required fields");
+    //   return null;
+    // }
 
-    let data = createFormData(formData, images);
-    console.log(data,'data')
-    axios.post(`${USERS_URL}/profile/update`, data)
-    .then(res=>{
-      console.log(res)
-    })
-    .catch(err=>{
-      console.log(err)
-    }) 
+    let data = createFormData({ ...formData, prompts, profile_picture }, images);
 
+    showLoading();
+
+    axiosInstance
+      .post(
+        `http://localhost:7614/users/profileupdate/?user_id=${user_id}`,
+        data
+      )
+      .then((res) => {
+        console.log(res);
+        hottoast.success('Saved Successfully')
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        hideLoading();
+      });
   };
+
+  useEffect(() => {
+    showLoading()
+
+    axiosInstance.get(`${USERS_URL}/${user_id}`)
+    .then((res)=>{
+      setData(res.data)
+      setPrompts(res.data.prompts)
+      setImages(res.data.gallery)
+      console.log(res, 'SUCCESS')
+      
+    })
+    .catch((err)=>{
+      console.log(err, 'err');
+
+    })
+    .finally(()=>{
+      hideLoading()
+      console.log(formData, 'formdata');
+    })
+  }, []);
 
   return (
     <>
@@ -85,15 +221,15 @@ function UserProfile() {
       <div className="mx-auto lg:w-[70%] ">
         <div className="flex flex-col lg:flex-row ">
           <div className="lg:w-[40%] w-full mt-5 mb-5">
-            <div className="mb-2">
+            <div className="mb-3">
               <label htmlFor="" className="flex ml-3">
-                Name
+                Name <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="name"
-                value={name}
+                value={formData?.name ? formData.name : data?.user.name}
                 onChange={handleValueChange}
               />
             </div>
@@ -102,35 +238,36 @@ function UserProfile() {
                 Phone number
               </label>
               <input
-                type="number"
+                type="text"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="phone_number"
-                value={phone_number}
+                value={formData?.phone_number ? formData.phone_number : data?.user.phone_number}
                 onChange={handleValueChange}
               />
             </div>
             <div className="mb-2">
               <label htmlFor="" className="flex ml-3">
-                Date of birth
+                Date of birth <span className="text-red-600">*</span>
               </label>
               <input
                 type="date"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="date_of_birth"
-                value={date_of_birth}
+                value={data?.user.date_of_birth}
                 onChange={handleValueChange}
               />
             </div>
             <div className="mb-2">
               <label htmlFor="" className="flex ml-3">
-                Gender
+                Gender <span className="text-red-600">*</span>
               </label>
               <select
                 className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="gender"
-                value={gender}
+                value={formData?.gender ? formData.gender : data?.user.gender}
                 onChange={handleValueChange}
               >
+                <option value="">Choose</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Others">Others</option>
@@ -138,14 +275,15 @@ function UserProfile() {
             </div>
             <div className="mb-2">
               <label htmlFor="" className="flex ml-3">
-                Interested in
+                Interested in <span className="text-red-600">*</span>
               </label>
               <select
                 className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="interested_in"
-                value={interested_in}
+                value={formData?.interested_in ? formData.interested_in : data?.user.interested_in}
                 onChange={handleValueChange}
               >
+                <option value="">Choose</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Others">Others</option>
@@ -157,11 +295,14 @@ function UserProfile() {
               </label>
               <select
                 className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
-                name="educational_level"
-                value={educational_level}
+                name="education_level"
+                value={formData?.education_level ? formData.education_level : data?.user.education_level}
                 onChange={handleValueChange}
               >
+                <option value="">Choose</option>
                 <option value="High School">High School</option>
+                <option value="Trade / Tech">Trade / Tech</option>
+                <option value="Incollege">In  college</option>
                 <option value="Diploma">Diploma</option>
                 <option value="Graduate">Graduate</option>
                 <option value="Postgraduate">Postgraduate</option>
@@ -169,50 +310,389 @@ function UserProfile() {
             </div>
             <div className="mb-2">
               <label htmlFor="" className="flex ml-3">
-                Work
+                Height
               </label>
               <input
-                type="text"
-                placeholder="Position"
+                type="number"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
-                name="work"
-                value={work}
+                name="height"
+                value={formData?.height ? formData.height : data?.user.height}
                 onChange={handleValueChange}
               />
             </div>
+            <div className="mb-2">
+              <label htmlFor="" className="flex ml-3">
+                Weight
+              </label>
+              <input
+                type="number"
+                className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
+                name="weight"
+                value={formData?.weight ? formData.weight : data?.user.weight}
+                onChange={handleValueChange}
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="" className="flex ml-3 ">
+                Location
+              </label>
+              <input
+                type="text"
+                className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
+                name="location"
+                value={formData?.location ? formData.location : data?.user.location}
+                onChange={handleValueChange}
+              />
+            </div>
+            <div className="mb-2 ">
+              <div className="accordion-group border border-slate-300 rounded">
+                <div className="accordion">
+                  <input
+                    type="checkbox"
+                    id="accordion-1"
+                    className="accordion-toggle"
+                  />
+                  <div className="flex justify-between items-center">
+                    <label
+                      for="accordion-1"
+                      className="accordion-title text-base font-normal ml-2"
+                    >
+                      Interests
+                    </label>
+                    <RiArrowDownSFill className="mr-4" size={30} />
+                  </div>
+                  <div className="accordion-content">
+                    <div className="min-h-0">
+                      <div className="mr-1 ml-4 mb-2">
+                        <label htmlFor="" className="flex ml-3">
+                          Workout
+                        </label>
+                        <select
+                          className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="workout"
+                          value={formData?.workout ? formData.workout : data?.interests.workout}
+                          onChange={handleValueChange}
+                        >
+                          <option value="">Choose</option>
+                          <option value="Active">Active</option>
+                          <option value="Sometimes">Sometimes</option>
+                          <option value="Almost">Almost</option>
+                          <option value="Never">Never</option>
+                        </select>
+                      </div>
+                      <div className="mr-1 ml-4 mb-2">
+                        <label htmlFor="" className="flex ml-3">
+                          Drinks
+                        </label>
+                        <select
+                          className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="drinks"
+                          value={formData?.drinks ? formData.drinks : data?.interests.drinks}
+                          onChange={handleValueChange}
+                        >
+                          <option value="">Choose</option>
+                          <option value="Frequently">Frequently</option>
+                          <option value="Socially">Socially</option>
+                          <option value="Rarely">Rarely</option>
+                          <option value="Never">Never</option>
+                        </select>
+                      </div>
+                      <div className="mr-1 ml-4 mb-2">
+                        <label htmlFor="" className="flex ml-3">
+                          Smoking
+                        </label>
+                        <select
+                          className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="smoking"
+                          value={formData?.smoking ? formData.smoking : data?.interests.smoking}
+                          onChange={handleValueChange}
+                        >
+                          <option value="">Choose</option>
+                          <option value="Frequently">Frequently</option>
+                          <option value="Socially">Socially</option>
+                          <option value="Rarely">Rarely</option>
+                          <option value="Never">Never</option>
+                        </select>
+                      </div>
+                      <div className="mr-1 ml-4 mb-2">
+                        <label htmlFor="" className="flex ml-3">
+                          What are you looking in dating?
+                        </label>
+                        <select
+                          className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="dating_purpose"
+                          value={formData?.dating_purpose ? formData.dating_purpose : data?.interests.dating_purpose}
+                          onChange={handleValueChange}
+                        >
+                          <option value="">Choose</option>
+                          <option value="Relationship">Relationship</option>
+                          <option value="Something Casual">
+                            Something Casual
+                          </option>
+                          <option value="Don't know right now">
+                            Don't know right now
+                          </option>
+                          <option value="Marriage">Marriage</option>
+                        </select>
+                      </div>
+                      <div className="mr-1 ml-4 mb-2">
+                        <label htmlFor="" className="flex ml-3">
+                          Zodiac Sign
+                        </label>
+                        <select
+                          className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="zodiac_sign"
+                          value={formData?.zodiac_sign ? formData.zodiac_sign : data?.interests.zodiac_sign}
+                          onChange={handleValueChange}
+                        >
+                          <option value="">Choose</option>
+                          <option value="Aries">Aries</option>
+                          <option value="Taurus">Taurus</option>
+                          <option value="Gemini">Gemini</option>
+                          <option value="Cancer">Cancer</option>
+                          <option value="Leo">Leo</option>
+                          <option value="Virgo">Virgo</option>
+                          <option value="Libra">Libra</option>
+                          <option value="Scorpio">Scorpio</option>
+                          <option value="Sagittarius">Sagittarius</option>
+                          <option value="Capricorn">Capricorn</option>
+                          <option value="Aquarius">Aquarius</option>
+                          <option value="Pisces">Pisces</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button
+                className="btn bg-[#fa9ac7e9] text-[#b3346f] hover:bg-pink-400 hover:text-white"
+                onClick={handleSubmit}
+              >
+                Save
+              </button>
+            </div>
           </div>
           <div className=" lg:w-[60%] lg:ml-5">
-            <div className="grid grid-cols-3 gap-12 mt-8">
-              {imagesLink.length > 0 ? (
-                <img
-                  className="p-6 rounded-xl outline-8 outline-slate-400 outline-dashed"
-                  src={imagesLink[0]}
-                />
+            <div className="my-2 mt-4">
+              <h3 className="mb-4">Profile Picture</h3>
+              {profileLink || data?.user.profile_picture ? (
+                <label>
+                  <img
+                    className=" h-[40%] w-[30%] rounded-xl shadow-[14px_4px_20px_0px_#cfcfcf]"
+                    src={profileLink ? profileLink : `${IMAGE_URL}${data?.user.profile_picture}`}
+                  />
+                  <input
+                    type="file"
+                    name="profile"
+                    className="input-file hidden cursor-pointer"
+                    onChange={handleProfileImageChange}
+                  />
+                </label>
               ) : (
-                <ImageUpload handleImageChange={handleImageChange} />
-              )}
-              {imagesLink.length > 1 ? (
-                <img
-                  className="p-6 rounded-xl outline-8 outline-slate-400 outline-dashed"
-                  src={imagesLink[1]}
+                <ImageUpload
+                  handleImageChange={handleProfileImageChange}
+                  name="profile"
                 />
-              ) : (
-                <ImageUpload handleImageChange={handleImageChange} />
               )}
-              {imagesLink.length > 2 ? (
-                <img
-                  className="p-6 rounded-xl outline-8 outline-slate-400 outline-dashed"
-                  src={imagesLink[2]}
-                />
-              ) : (
-                <ImageUpload handleImageChange={handleImageChange} />
-              )}
+            </div>
+            <div className="my-4">
+              <h3 className="mb-4">Gallery</h3>
+              <div className="grid grid-cols-3 gap-12 mt-1">
+                {images.length > 0 ? (
+                  <label>
+                    <img
+                      className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
+                      src={images[0] && typeof images[0].image !== 'string' ? URL.createObjectURL(images[0].image) : `${IMAGE_URL}${images[0].image}`} 
+                    />
+                    <input
+                      type="file"
+                      name="gallery"
+                      className="input-file hidden cursor-pointer"
+                      onChange={(event) => handleGalleryImageChange(event, 0)}
+                    />
+                  </label>
+                ) : (
+                  <ImageUpload
+                    handleImageChange={handleGalleryImageChange}
+                    name="gallery"
+                  />
+                )}
+                {images.length > 1 ? (
+                  <label>
+                    <img
+                      className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
+                      src={images[1] && typeof images[1].image !== 'string' ? URL.createObjectURL(images[1].image) : `${IMAGE_URL}${images[1].image}`}
+                    />
+                    <input
+                      type="file"
+                      name="gallery"
+                      className="input-file hidden cursor-pointer"
+                      onChange={(event) => handleGalleryImageChange(event, 1)}
+                    />
+                  </label>
+                ) : (
+                  <ImageUpload
+                    handleImageChange={handleGalleryImageChange}
+                    name="gallery"
+                  />
+                )}
+                {images.length > 2 ? (
+                  <label>
+                    <img
+                      className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
+                      src={images[2] && typeof images[2].image !== 'string' ? URL.createObjectURL(images[2].image) : `${IMAGE_URL}${images[2].image}`}
+                    />
+                    <input
+                      type="file"
+                      name="gallery"
+                      className="input-file hidden cursor-pointer"
+                      onChange={(event) => handleGalleryImageChange(event, 2)}
+                    />
+                  </label>
+                ) : (
+                  <ImageUpload
+                    handleImageChange={handleGalleryImageChange}
+                    name="gallery"
+                  />
+                )}
+              </div>
+            </div>
+            <div className="mb-2">
+              <label htmlFor="" className="flex ml-3">
+                Bio
+              </label>
+              <textarea
+                type="text"
+                className="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg focus:border-pink-400 overflow-hidden"
+                name="bio"
+                value={formData?.bio ? formData.bio : data?.user.bio}
+                placeholder="Bio"
+                onChange={handleValueChange}
+              />
+            </div>
+            <div className="mb-2">
+              <div className="accordion-group border border-slate-300 rounded">
+                <div className="accordion">
+                  <input
+                    type="checkbox"
+                    id="accordion-2"
+                    className="accordion-toggle"
+                  />
+                  <div className="flex justify-between items-center">
+                    <label
+                      for="accordion-2"
+                      className="accordion-title text-base font-normal ml-2"
+                    >
+                      Work
+                    </label>
+                    <RiArrowDownSFill className="mr-4" size={30} />
+                  </div>
+                  <div className="accordion-content">
+                    <div className="min-h-0 flex justify-center items-center">
+                      <div className="mr-1">
+                        <label htmlFor="" className="flex ml-3">
+                          Title
+                        </label>
+                        <input
+                          type="text"
+                          className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="title"
+                          value={formData?.works ? formData?.works[0]?.title : data?.works.title}
+                          onChange={handleValueChange}
+                        />
+                      </div>
+                      <div className="ml-1">
+                        <label htmlFor="" className="flex ml-3">
+                          Company
+                        </label>
+                        <input
+                          type="text"
+                          className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
+                          name="company"
+                          value={formData?.works ? formData?.works[0]?.company : data?.works.company}
+                          onChange={handleValueChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mb-2 mt-6">
+              <div>
+                <label htmlFor="" className="flex ml-3">
+                  Prompts
+                </label>
+                <div className="flex">
+                  <textarea
+                    type="text"
+                    className="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg focus:border-pink-400 overflow-hidden"
+                    name="tempPrompt"
+                    value={tempPrompt}
+                    onChange={(e) => setTempPrompt(e.target.value)}
+                  />
+                  <div
+                    className="p-2 bg-[#fc449a] m-4 rounded-full"
+                    onClick={addPrompt}
+                  >
+                    <RiAddLine size={32} />
+                  </div>
+                </div>
+
+                {prompts.map((item, index) => (
+                  <div className="flex border border-slate-300 rounded-md my-3">
+                    {isPromptEdit && editingPromptId === index ? (
+                      <input
+                        className="w-full bg-[#da7272] border-none rounded-md my-4 p-2 ml-2 text-sm"
+                        key={index}
+                        type="text"
+                        value={tempPrompt.prompt}
+                        onChange={(e) =>
+                          setTempPrompt({
+                            ...tempPrompt,
+                            prompt: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      <div
+                        key={index}
+                        className="w-full bg-[#e9e9e9] rounded-md my-4 p-2 ml-2 text-sm"
+                      >
+                        {item.prompt}
+                      </div>
+                    )}
+                    <div className="m-2">
+                      {isPromptEdit && editingPromptId === index ? (
+                        <div
+                          className="bg-blue-200 w-8 h-8 flex items-center justify-center rounded m-1"
+                          onClick={() => updatePrompt(index)}
+                        >
+                          <RiCheckLine size={18} />
+                        </div>
+                      ) : (
+                        <div
+                          className="bg-blue-200 w-8 h-8 flex items-center justify-center rounded m-1"
+                          onClick={() => editPrompt(item, index)}
+                        >
+                          <RiPencilLine size={18} />
+                        </div>
+                      )}
+                      <div
+                        className="bg-red-400 w-8 h-8 flex items-center justify-center rounded m-1"
+                        onClick={() => deletePrompt(index)}
+                      >
+                        <RiCloseCircleLine size={18} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        <button className="btn bg-[#fc449a]" onClick={()=>handleSubmit}>
-          Save
-        </button>
       </div>
     </>
   );

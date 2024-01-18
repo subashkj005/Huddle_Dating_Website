@@ -5,7 +5,6 @@ from services.logger import logger
 
 def is_request_valid(req):
     access_token = req.cookies.get('access_token', None)
-    # refresh_token = req.cookies.get('refresh_token', None)
 
     # No access token
     if not access_token:

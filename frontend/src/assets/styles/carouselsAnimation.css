@@ -1,0 +1,64 @@
+.carousel-container {
+  transition: transform 1s ease;
+}
+
+@keyframes animateCarousel {
+  0% {
+    transform: scale(1);
+  }
+  5% {
+    transform: scale(0.9);
+  }
+  10% {
+    transform: scale(1);
+  }
+
+}
+
+.animate {
+  animation: animateCarousel 1s;
+  
+}
+
+.fadein {
+  animation: fadeIn 0.7s ease-in-out;
+
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
+
+
+
+
+
+/* .carousel-container {
+
+    transition: transform 1s ease;
+  }
+  
+  @keyframes animateCarousel {
+    0% {
+      transform: scale(1);
+    }
+    5% {
+      transform: scale(0.9);
+    }
+    10% {
+      transform: scale(1);
+    }
+  
+  }
+
+  .animate {
+    animation: animateCarousel 2s;
+  }
+   */

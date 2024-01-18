@@ -1,0 +1,32 @@
+.heart {
+  transition: transform 0.3s ease;
+  animation: none;
+
+  &:hover {
+    transform: rotate(45deg) scale(1.2);
+    animation: animateHeart 1.2s infinite;
+    transition: transform 0.3s ease;
+  }
+}
+
+@keyframes animateHeart {
+  0% {
+    transform: scale(0.8);
+  }
+  5% {
+    transform: scale(0.9);
+  }
+  10% {
+    transform: scale(0.8);
+  }
+  15% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
+

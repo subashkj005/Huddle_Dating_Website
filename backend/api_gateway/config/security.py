@@ -15,6 +15,7 @@ def create_new_access_token(refresh_token):
         payload = jwt.decode(refresh_token, settings.JWT_SECRET,
                              algorithms=settings.JWT_ALGORITHM)
         new_access_token = create_access_token(payload)
+        logger.info("New access token created")
         return new_access_token, payload
     except ExpiredSignatureError:
         logger.error("Refresh token expired")
@@ -50,7 +51,15 @@ def validate_token(access_token):
         return None, payload
     except ExpiredSignatureError:
         logger.error('Access token expired')
-        return get_refresh_token_from_redis(payload), payload
+        payload = jwt.decode(access_token, settings.JWT_SECRET,
+                             algorithms=settings.JWT_ALGORITHM,
+                             options={'verify_exp': False})
+        refresh_token =  get_refresh_token_from_redis(payload)
+        
+        if not refresh_token:
+            return None, None
+        
+        return create_new_access_token(refresh_token)
     except JWTError as e:
         logger.error("Error decoding token: %s", {e})
         return None, None

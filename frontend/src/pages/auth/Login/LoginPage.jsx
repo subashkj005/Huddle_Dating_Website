@@ -1,12 +1,17 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import  '../../../assets/styles/authStyles.css'
 import img from '../../../assets/front-image.jpg'
 import logo from '../../../assets/images/logo_png_hd-cropped.png'
 import { Link, useNavigate } from "react-router-dom";
 import { Alert } from '@mui/material';
-import { PUBLIC_URL, USERS_URL } from '../../../constants/urls'
-import { isPasswordStrongEnough } from '../../../utils/auth/passwordStrength'
+import { PUBLIC_URL} from '../../../constants/urls'
 import axiosInstance from '../../../axios/axiosInstance'
+import { LoadingContext } from '../../../context/LoadingContext';
+import { useDispatch } from 'react-redux';
+import { loggedIn } from '../../../redux/slices/logSlice';
+
+
+
 
 
 
@@ -16,14 +21,12 @@ function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState("");
-    const isPasswordStrong = isPasswordStrongEnough(password)
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { showLoading, hideLoading } = useContext(LoadingContext)  
 
-    const checkPassword = (value) => {
-        setPassword(value)
-        setErrorMessage(isPasswordStrong.message);
-    }
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -38,18 +41,24 @@ function LoginPage() {
             password: password
         }
 
-        axiosInstance.post(`${PUBLIC_URL}/login`, data, { withCredentials: true })
+
+        showLoading()
+        console.log('calling request');
+        axiosInstance.post(`${PUBLIC_URL}/login`, data) 
         .then(res=>{
             console.log('login success', res)
             if (res.status == '200') {
+                dispatch(loggedIn(res.data.user))
                 navigate('home')
             }
-            
-            
+        
         })
         .catch(err=>{
             console.log('login error',err)
-            setErrorMessage(err?.response?.data?.detail)
+            setErrorMessage(err?.response?.data?.detail || err?.response?.data?.message ||err?.message)
+        })
+        .finally(()=> {
+            hideLoading()
         })
 
         setErrorMessage("")
@@ -76,7 +85,7 @@ function LoginPage() {
                             </div>
                             <div className="input-box">
                                 <label for="password">Password</label>
-                                <input type="password" value={password} onChange={e=>checkPassword(e.target.value)}/>
+                                <input type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
                             </div>
                             <div className="links-box">
                                 <p className="forgot-link">
@@ -93,9 +102,6 @@ function LoginPage() {
                      </div>
                      <div className="google-box"></div>
                      {errorMessage && (
-                    // <Alert onClose={() => setErrorMessage("")} severity={!isPasswordStrong.strongEnough ? "warning" : "success"}>
-                    //     {errorMessage}
-                    // </Alert>
                     <Alert onClose={() => setErrorMessage("")} severity="warning">
                         {errorMessage}
                     </Alert>

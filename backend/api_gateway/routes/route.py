@@ -10,7 +10,10 @@ bp = Blueprint('routes', __name__)
 @bp.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'])
 def gateway(path):
     
-    logger.info(f'Gateway recieved request of {request.url}')
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    logger.info(f'Gateway recieved request for <{request.url}>')
     new_access_token = None
     
     # Getting the service name
@@ -32,6 +35,7 @@ def gateway(path):
     response = forward_request(request, path)
     
     if response is None:
+        logger.error('No response from the service')
         return jsonify({"message": "Server Error"}), 500
     
     # Response from the forward_request is response of 'requests' library which flask won't accept to return.
@@ -42,6 +46,6 @@ def gateway(path):
         logger.info(f"New access token added")
         new_response.set_cookie('access_token', new_access_token, httponly=True, samesite='None', secure=True, path='/')
         
-    logger.info(f"Request successfully completed")
+    logger.info(f"Request successfully returned to source")
     
     return new_response

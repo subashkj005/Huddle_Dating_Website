@@ -11,6 +11,7 @@ __pycache__/
 # Virtual environment
 venv/
 env/
+/frontend/.env
 
 # FastAPI
 .pytest_cache/
@@ -75,8 +76,16 @@ db.sqlite3
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# others
 /backend/user_management_service/.env
 /backend/user_management_service/alembic/
 /backend/user_management_service/alembic.ini
 /backend/api_gateway/api_venv/
 /backend/api_gateway/.env
+/temp/
+/frontend/src/temp_data/
+
+
+# Media files
+/backend/user_management_service/static/

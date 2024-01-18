@@ -26,18 +26,19 @@ def forward_request(request, path):
     try:
         response = requests.request(
             method=method, url=url, headers=headers, data=data, params=params, files=files)
+        logger.info('Request forwarded')
         
         if response.status_code == 200:
-            logger.info(f"Forwarded request to {url} with status code: {response.status_code}")
+            logger.info(f"Response returned success: {response.status_code}")
         else:
-            logger.error(f"Forward request: {url} FAILED.. with status code: {response.status_code}")
+            logger.error(f"Response returned failure: {response.status_code}")
             
 
         # Return the response from the second server to the original client
         return response
     except requests.RequestException as e:
         # Handle the case where the second request fails
-        logger.error(f"Request forwarding to {url} failed: {e}")
+        logger.error(f"Request forwarding FAILED.. :\n {e}")
         return None
     
     
@@ -45,8 +46,6 @@ def create_flask_response(res):
     content = res.content
     status_code = res.status_code
     headers = dict(res.headers)
-    
-    logger.info(f"API Response headers {headers}")
     
     # Create a Flask response
     flask_response = Response(content, status=status_code, headers=headers)

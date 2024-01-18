@@ -2,17 +2,19 @@ import React from 'react'
 
 function ImageUpload(props) {
   return (
-    <label htmlFor="fileInput" 
-      className='p-10 bg-[rgb(238,213,176)] flex items-center
-       justify-center rounded-xl outline-8 outline-[#fc449a]
+    
+    <label  
+      className='p-10 bg-[rgb(233,233,233)] flex items-center
+       justify-center rounded-xl outline-3 outline-[#fd7ab7]
         outline-dashed text-[#fc449a] text-center text-2xl
          font-extrabold'
-         onChange={(e) => props.handleImageChange(e)}>
+         >
         +
         <input
           type="file"
-          id="fileInput"
+          name={props.name}
           className="input-file hidden cursor-pointer"
+          onChange={props.handleImageChange}
           
         />
       </label>

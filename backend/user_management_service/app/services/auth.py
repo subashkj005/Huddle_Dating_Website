@@ -41,8 +41,8 @@ def _verify_user_access(user: User):
         )
 
 
-async def _get_user_token(user: User, refresh_token=None):
-    payload = {"id": user.id}
+async def _get_user_token(user: User, refresh_token=None, role=None):
+    payload = {"id": user.id, "role": role}
     access_token_expiry = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(payload, access_token_expiry)
@@ -77,10 +77,20 @@ async def get_google_login_token(data, db: db_dependency):
     return await _get_user_token(user=user)
 
 
-async def get_user_login_token(user: User):
+async def get_user_login_token(user, role=None):
+
     access_token = await _get_user_token(user)
     response = JSONResponse(
-        content={"message": "User Login Successful"}, status_code=200)
+        content={
+            "message": f"Login Successful",
+            "user": {
+                'id': user.id,
+                'name': user.name if user.name else "User",
+                'role': user.role,
+                'status': user.is_active if user.role == 'user' else ""
+            }
+        },
+        status_code=200)
     response.set_cookie(
         'access_token', access_token, httponly=True, samesite='None', secure=True, path='/')
     return response

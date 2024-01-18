@@ -6,5 +6,7 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require("rippleui")],
+  plugins: [require("rippleui"),
+            require('@tailwindcss/forms'),
+          ],
 }

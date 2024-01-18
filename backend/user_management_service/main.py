@@ -1,6 +1,10 @@
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import FastAPI
-from app.routes.users import user_router, guest_router
+from app.routes.public import guest_router
+from app.routes.users import user_router
+from admin.routes.admin import admin_router
+from admin.routes.users import user_related_router
 from app.routes.auth import auth_router
 from app.routes.profile import profile_router
 from starlette.middleware.authentication import AuthenticationMiddleware
@@ -12,7 +16,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost",
-    "http://localhost:3000",
+    "http://localhost:5001",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
@@ -29,9 +34,16 @@ app.include_router(auth_router) # /auth
 app.include_router(user_router) # /users
 app.include_router(profile_router) # /users/profile
 
+# Admin
+app.include_router(admin_router) # /admin
+app.include_router(user_related_router) # /user_related_route
+
 # Middlewares
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
 
+# Static files
+app.mount("/static", StaticFiles(directory='static'), name='static')
+
 
 if __name__ == "__main__":
-    uvicorn.run('main:app', host='0.0.0.0', port=7614)
+    uvicorn.run('main:app', host='0.0.0.0', port=7614, reload=True)
