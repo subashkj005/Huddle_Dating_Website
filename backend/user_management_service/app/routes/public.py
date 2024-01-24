@@ -1,7 +1,10 @@
+import base64
+import binascii
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from starlette.responses import JSONResponse
 from app.config.database import db_dependency
 from app.fastmail.config import send_email_with_otp
+from app.models.faker_data import store_fake_data
 from app.schemas.schemas import RegisterUserRequest, OTPRequest, UserLoginRequest
 from app.models.models import User
 from app.services.auth import get_user_login_token
@@ -60,7 +63,7 @@ async def user_signup(user: RegisterUserRequest, db: db_dependency):
         print('=============================')
         return JSONResponse(status_code=502, content={"message": "Server Issue, services will be available soon..!"})
 
-    await send_email_with_otp([user.email], str(otp))
+    # await send_email_with_otp([user.email], str(otp))
 
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Email sent successfully"})
 
@@ -69,9 +72,14 @@ async def user_signup(user: RegisterUserRequest, db: db_dependency):
 async def otp_confimation(data: OTPRequest, db: db_dependency):
     # Key for getting user details
     user_key = f"temp_user:{data.email}"
+    
+    print('\n data ==>', data)
+    print('data.email ==>', data.email)
 
     redis = RedisController()
     result = redis.get_hash_data(user_key)
+    
+    print('\n result ==>', result)
 
     if result["status"] == "error":
         return JSONResponse(status_code=400, content={"message": "OTP Expired"})
@@ -115,3 +123,36 @@ async def user_login(data: UserLoginRequest, db: db_dependency):
             status_code=400, detail="Your account has been deactivated. Please contact support.")
         
     return await get_user_login_token(user, Role.USER.value)
+
+
+@guest_router.get('/add_users/{count}')
+def add_fake_users(db: db_dependency, count:str):
+    users = store_fake_data(db, int(count))
+    return users
+
+
+@guest_router.post('/add_image')
+async def add_image(request: Request):
+    data = await request.json()
+    if not data:
+        return
+    base64_str = data['image']
+    try:
+        image = base64.b64decode(base64_str, validate=True)
+        file_name = 'converted_image.jpg'
+        with open(file_name, "wb") as f: # Converting to image file
+            f.write(image)
+            
+        print('typeofImage ==>', type(image))
+    except binascii.Error as e:
+        print(f"Error while image convertion: {e}")
+        
+    try:
+        destination = f"static/temp/{file_name}"
+
+        with open(destination, 'wb') as buffer: # Saving the image file
+            buffer.write(image)
+    except Exception as e :
+        print(f'error while saving = {e}')
+        
+    return 

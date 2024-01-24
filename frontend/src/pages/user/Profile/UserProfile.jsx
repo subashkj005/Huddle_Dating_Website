@@ -176,21 +176,36 @@ function UserProfile() {
 
     showLoading();
 
-    axiosInstance
+    const promise = axiosInstance
       .post(
         `http://localhost:7614/users/profileupdate/?user_id=${user_id}`,
         data
       )
-      .then((res) => {
-        console.log(res);
-        hottoast.success('Saved Successfully')
+
+      hottoast.promise(promise,{
+        loading: 'Updating profile...',
+        success: "Updated successfully",
+        error: "Unable to update profile"
+      },
+      {
+        style: {
+          minWidth: '250px',
+        },
+        success: {
+          duration: 3000,
+          icon: '✅',
+        },
+        timeout: 5000,
       })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        hideLoading();
-      });
+      
+
+      promise
+        .catch((err) => {
+          console.log('ERR ===>\n',err);
+        })
+        .finally(() => {
+          hideLoading();
+        });
   };
 
   useEffect(() => {

@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import img from '../../../assets/front-image.jpg'
 import logo from '../../../assets/images/logo_png_hd-cropped.png'
 import { Alert } from '@mui/material';
 import axios from 'axios';
 import { PUBLIC_URL } from '../../../constants/urls'
+import { LoadingContext } from "../../../context/LoadingContext";
+import {toast as hottoast} from 'react-hot-toast';
 
 function OTPVerification() {
   const [otpValues, setOtpValues] = useState(['', '', '', '']);
-  const [loading, setLoading] = useState(false)
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const [errorMessage, setErrorMessage] = useState();
   const location = useLocation()
   const email = location.state?.email
@@ -63,21 +65,23 @@ function OTPVerification() {
       otp: joinedOTP,
     };
 
-    setLoading(true);
+    showLoading();
 
     axios
       .post(`${PUBLIC_URL}/otp_confirm`, data)
       .then((res) => {
         console.log('otp success', res);
         setErrorMessage(res.data.message);
+        hottoast.success('Account created successfully')
         navigate("/")
       })
       .catch((err) => {
         console.log(err, err.response.data.message);
         setErrorMessage(err.response.data.message);
+        
       })
       .finally(() => {
-        setLoading(false);
+        hideLoading();
       });
 
     setErrorMessage('');

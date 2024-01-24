@@ -13,7 +13,7 @@ function Sidebar() {
             <p>Get your matches here</p>
           </div>
         </div>
-        <div className=" bg-slate-200 w-screen rounded ml-1 flex items-center justify-center">
+        <div className=" bg-slate-200 relative w-screen rounded ml-1 flex items-center justify-center">
           <Display />
         </div>
       </div>

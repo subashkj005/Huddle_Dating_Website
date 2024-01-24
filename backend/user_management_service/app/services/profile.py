@@ -88,16 +88,26 @@ async def update_user_profile(user_id, request, db):
         return JSONResponse(content={'message': "Invalid User"}, status_code=400)
     print('3\n')
     # Update fields
-    user.name = data.get('name', user.name)
-    user.phone_number = data.get('phone_number', user.phone_number)
-    user.date_of_birth = data.get('date_of_birth', user.date_of_birth)
-    user.gender = data.get('gender', user.gender)
-    user.height = int(data.get('height', user.height))
-    user.weight = int(data.get('weight', user.weight))
-    user.location = data.get('location', user.location)
-    user.interested_in = data.get('interested_in', user.interested_in)
-    user.education_level = data.get('education_level', user.education_level)
-    user.bio = data.get('bio', user.bio)
+    if 'name' in data:
+        user.name = data.get('name', user.name)
+    if 'phone_number' in data:
+        user.phone_number = data.get('phone_number', user.phone_number)
+    if 'date_of_birth' in data:
+        user.date_of_birth = data.get('date_of_birth', user.date_of_birth)
+    if 'gender' in data:
+        user.gender = data.get('gender', user.gender)
+    if 'height' in data:
+        user.height = int(data.get('height', user.height))
+    if 'weight' in data:
+        user.weight = int(data.get('weight', user.weight))
+    if 'interested_in' in data:
+        user.interested_in = data.get('interested_in', user.interested_in)
+    if 'education_level' in data:
+        user.education_level = data.get('education_level', user.education_level)
+    if 'bio' in data:
+        user.bio = data.get('bio', user.bio)
+    if 'location' in data:
+        user.location = data.get('location', user.location)
     print('4\n')
 
     # Update Work instance
@@ -132,19 +142,26 @@ async def update_user_profile(user_id, request, db):
         user_interests = user.interests
         if not user_interests:
             print('12\n')
-            user_interests = UserInterests(user_id=user.id)
+            user_new_interests = UserInterests(user_id=user.id)
+            user_interests = user_new_interests
+
         print('13\n')
-        user_interests.workout = data.get('workout', user.interests.workout)
-        user_interests.drinks = data.get('drinks', user.interests.drinks)
-        user_interests.smoking = data.get('smoking',user.interests.smoking)
-        user_interests.dating_purpose = data.get('dating_purpose', user.interests.dating_purpose)
-        user_interests.zodiac_sign = data.get('zodiac_sign', user.interests.zodiac_sign)
+        if 'workout' in data:
+            user_interests.workout = data.get('workout')
+        if 'drinks' in data:
+            user_interests.drinks = data.get('drinks')
+        if 'smoking' in data:
+            user_interests.smoking = data.get('smoking')
+        if 'dating_purpose' in data:
+            user_interests.dating_purpose = data.get('dating_purpose')
+        if 'zodiac_sign' in data:
+            user_interests.zodiac_sign = data.get('zodiac_sign')
         print('14\n')
         # for interest in user_interests:
         db.add(user_interests)
         print('15\n')
     # Update profile picture
-    if 'profile_picture' in data:
+    if data['profile_picture'] is not None:
         print('16\n')
         profile_picture = data['profile_picture']
         if type(profile_picture) != str:
@@ -189,3 +206,4 @@ async def update_user_profile(user_id, request, db):
                                      "gallery_image_error": gallery_image_error}, status_code=200)
 
     return JSONResponse(content={"message": "Updated user profile successfully"}, status_code=200)
+  

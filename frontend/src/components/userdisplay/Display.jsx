@@ -16,20 +16,18 @@ import { MdCancel } from "react-icons/md";
 import { BsLightningFill } from "react-icons/bs";
 import fake_details from "../../temp_data/user_data";
 import { IMAGE_URL } from "../../constants/urls";
+import UserSettings from "../userSettingsModal/UserSettings";
+
 
 function Display() {
   const [data, setData] = useState([]);
   const [account, setAccount] = useState([]);
   const [accountIndex, setAccountIndex] = useState(0);
   const [animation, setAnimation] = useState(false);
-  const [slides, setSlides] = useState([])
+  const [slides, setSlides] = useState([]);
 
   let counter = 0;
-  let lastScrollTime = 0;
-
-  // console.log(data, "data");
-  // console.log(account, "account");
-  // console.log(account?.images[0], "account data")
+  let lastScrollTime = 0; 
 
   const handleSlideChange = (movement) => {
     if (movement == "forward" && accountIndex < data.length) {
@@ -47,19 +45,17 @@ function Display() {
       }, 1000);
       setAccount(data[accountIndex]);
     }
-    handleSlidePosition()
-    console.log('counter =', counter)
-
+    handleSlidePosition();
+    console.log("counter =", counter);
   };
-  
-  
+
   const handleSlidePosition = () => {
     slides.forEach((e) => {
       e.style.transform = `translateY(-${0 * 100}%)`;
     });
-    
-    console.log('counter = ', counter)
-  }
+
+    console.log("counter = ", counter);
+  };
 
   useEffect(() => {
     setData(fake_details);
@@ -67,19 +63,18 @@ function Display() {
 
     const carousel = document.getElementById("carousel");
     const contentSlides = carousel.querySelectorAll(".carousel-wrapper");
-    setSlides(contentSlides)
+    setSlides(contentSlides);
 
     contentSlides?.forEach((slide, index) => {
       slide.style.top = `${index * 100}%`;
     });
 
     const slideImage = () => {
-      console.log('counter =', counter)
+      console.log("counter =", counter);
       contentSlides.forEach((e) => {
         e.style.transform = `translateY(-${counter * 100}%)`;
       });
     };
-
 
     carousel?.addEventListener("wheel", (event) => {
       event.preventDefault();
@@ -98,6 +93,10 @@ function Display() {
 
   return (
     <>
+      <div className="absolute top-2 left-5">
+        <UserSettings/>
+      </div>
+
       <div
         id="carousel"
         className={`carousel-container ${

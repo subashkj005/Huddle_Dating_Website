@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import "../../../assets/styles/authStyles.css";
 import img from "../../../assets/front-image.jpg";
 import logo from "../../../assets/images/logo_png_hd-cropped.png";
@@ -9,6 +9,8 @@ import { PUBLIC_URL } from "../../../constants/urls";
 import { isPasswordStrongEnough } from "../../../utils/auth/passwordStrength";
 import HashLoadingScreen from "../../../components/loadingScreen/HashLoadingScreen";
 import axiosInstance from "../../../axios/axiosInstance";
+import { LoadingContext } from "../../../context/LoadingContext";
+
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ function SignupPage() {
 
   const { email, password, confirm_password } = formData;
   const [errorMessage, setErrorMessage] = useState();
-  const [loading, setLoading] = useState(false);
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const isPasswordStrong = isPasswordStrongEnough(password);
   const navigate = useNavigate();
 
@@ -48,7 +50,7 @@ function SignupPage() {
       setErrorMessage("Passwords do not match..!");
       return;
     }
-    setLoading(true);
+    showLoading();
 
     axiosInstance
       .post(`${PUBLIC_URL}/signup`, formData)
@@ -65,7 +67,7 @@ function SignupPage() {
         setErrorMessage(err.response.data.message);
       })
       .finally(() => {
-        setLoading(false);
+        hideLoading();
       });
 
     setErrorMessage("");
@@ -73,9 +75,7 @@ function SignupPage() {
 
   return (
     <>
-      {loading ? (
-        <HashLoadingScreen />
-      ) : (
+      
         <div className="container">
           <div className="left-sec">
             <div className="left-image">
@@ -101,7 +101,7 @@ function SignupPage() {
                   <div className="input-box">
                     <label for="password">Password</label>
                     <input
-                      type="text"
+                      type="password"
                       name="password"
                       value={password}
                       onChange={handleValueChange}
@@ -110,7 +110,7 @@ function SignupPage() {
                   <div className="input-box">
                     <label for="password">Confirm Password</label>
                     <input
-                      type="text"
+                      type="password"
                       name="confirm_password"
                       value={confirm_password}
                       onChange={handleValueChange}
@@ -129,7 +129,7 @@ function SignupPage() {
             </div>
           </div>
         </div>
-      )}
+      
     </>
   );
 }

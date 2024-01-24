@@ -20,8 +20,8 @@ class EducationalLevel(str, Enum):
     HIGH_SCHOOL = 'High School'
     TRADE_OR_TECH = 'Trade / Tech'
     IN_COLLEGE = 'Incollege'
-    UNDERGRADUATE = 'Undergraduate'
     GRADUATE = 'Graduate'
     POSTGRADUATE = 'Postgraduate'
     DIPLOMA = 'Diploma'
+    
     
