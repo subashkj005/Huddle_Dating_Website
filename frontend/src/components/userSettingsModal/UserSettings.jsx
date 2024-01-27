@@ -16,7 +16,7 @@ import { toast as hottoast } from "react-hot-toast";
 
 function UserSettings() {
   const userId = useSelector((state) => state.logUser.user.id);
-  const [gender, setGender] = useState("Male");
+  const [gender, setGender] = useState("Female");
   const [age, setAge] = useState([18, 24]);
   const [distance, setDistance] = useState(10);
   
@@ -30,15 +30,14 @@ function UserSettings() {
     dropdownRef.current.click()
     
     const data = {
-        'age_min': age[0],
-        'age_max': age[1],
+        'min_age': age[0],
+        'max_age': age[1],
         'distance': distance,
         'gender': gender
     }
     axiosInstance
       .post(`${USERS_URL}/update_settings/${userId}`, data)
       .then((res) => {
-        console.log("set_res ==>", res);
         if (res.status == 200) {
           hottoast.success("Settings updated");
         }
@@ -48,6 +47,15 @@ function UserSettings() {
       })
       .finally(() => {});
   };
+
+  useEffect(()=>{
+    axiosInstance.get(`${USERS_URL}/get_settings/${userId}`)
+    .then((res)=>{
+      setAge([res.data.min_age, res.data.max_age])
+      setDistance(res.data.distance)
+      setGender(res.data.gender)
+    })
+  }, [])
 
 
   return (
@@ -80,7 +88,7 @@ function UserSettings() {
               maxValue={80}
               minValue={1}
               color="danger"
-              defaultValue={10}
+              defaultValue={distance}
               className="sm"
               onChangeEnd={setDistance}
             />

@@ -80,6 +80,7 @@ async def get_google_login_token(data, db: db_dependency):
 async def get_user_login_token(user, role=None):
 
     access_token = await _get_user_token(user)
+    print('user.settings.max_age,=========\n', user.settings.max_age, type(user.settings.max_age,))
     response = JSONResponse(
         content={
             "message": f"Login Successful",
@@ -88,7 +89,7 @@ async def get_user_login_token(user, role=None):
                 'name': user.name if user.name else "User",
                 'role': user.role,
                 'status': user.is_active if user.role == 'user' else ""
-            }
+            },
         },
         status_code=200)
     response.set_cookie(

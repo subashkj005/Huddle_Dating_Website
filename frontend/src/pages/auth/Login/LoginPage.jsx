@@ -9,6 +9,8 @@ import axiosInstance from '../../../axios/axiosInstance'
 import { LoadingContext } from '../../../context/LoadingContext';
 import { useDispatch } from 'react-redux';
 import { loggedIn } from '../../../redux/slices/logSlice';
+import { storeSettings } from '../../../redux/slices/userSettingSlice';
+
 
 
 

@@ -15,21 +15,33 @@ import heart from "../../assets/images/pink_heart.png";
 import { MdCancel } from "react-icons/md";
 import { BsLightningFill } from "react-icons/bs";
 import fake_details from "../../temp_data/user_data";
-import { IMAGE_URL } from "../../constants/urls";
+import { IMAGE_URL, USERS_URL } from "../../constants/urls";
 import UserSettings from "../userSettingsModal/UserSettings";
-
+import axiosInstance from "../../axios/axiosInstance";
+import { useSelector } from "react-redux";
+import useFetchRecommends from '../../hooks/useFetchRecommends'
 
 function Display() {
-  const [data, setData] = useState([]);
-  const [account, setAccount] = useState([]);
+
+  const [
+    data,
+    setData, 
+    account, 
+    setAccount, 
+    isLimitReached, 
+    setLimitReached,  
+    fetchMoreUsers] = useFetchRecommends();
   const [accountIndex, setAccountIndex] = useState(0);
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
 
-  let counter = 0;
-  let lastScrollTime = 0; 
+  console.log('data  =>', data)
+
+  let counter = 0; // Counter for slider
+  let lastScrollTime = 0; // Carousel scrolltime
 
   const handleSlideChange = (movement) => {
+
     if (movement == "forward" && accountIndex < data.length) {
       setAccountIndex((prevState) => prevState + 1);
       setAnimation(true);
@@ -37,29 +49,41 @@ function Display() {
         setAnimation(false);
       }, 500);
       setAccount(data[accountIndex]);
+      console.log('a/c index =', accountIndex)
+
+      if (!isLimitReached && accountIndex == (data.length - 5)){
+        console.log('calling for fetching more users')
+        fetchMoreUsers()
+      }
+
+      if (data.length > 20) {
+        let accounts = data
+        const sliced_accounts = accounts.slice(10)
+        setData(sliced_accounts)
+        setAccountIndex(prevState => prevState - 10)
+        
+      }
+
     } else if (movement == "backward" && accountIndex > -1) {
       setAccountIndex((prevState) => prevState - 1);
       setAnimation(true);
       setTimeout(() => {
         setAnimation(false);
       }, 1000);
+
       setAccount(data[accountIndex]);
+  
     }
     handleSlidePosition();
-    console.log("counter =", counter);
   };
 
   const handleSlidePosition = () => {
     slides.forEach((e) => {
       e.style.transform = `translateY(-${0 * 100}%)`;
     });
-
-    console.log("counter = ", counter);
   };
 
   useEffect(() => {
-    setData(fake_details);
-    setAccount(fake_details[0]);
 
     const carousel = document.getElementById("carousel");
     const contentSlides = carousel.querySelectorAll(".carousel-wrapper");
@@ -70,7 +94,6 @@ function Display() {
     });
 
     const slideImage = () => {
-      console.log("counter =", counter);
       contentSlides.forEach((e) => {
         e.style.transform = `translateY(-${counter * 100}%)`;
       });
@@ -94,7 +117,7 @@ function Display() {
   return (
     <>
       <div className="absolute top-2 left-5">
-        <UserSettings/>
+        <UserSettings />
       </div>
 
       <div
@@ -103,6 +126,7 @@ function Display() {
           animation ? "animate" : ""
         } relative overflow-hidden flex flex-col overflow-y-hidden w-[68%] h-[94%] rounded-[10px] bg-white shadow-2xl`}
       >
+        <div className="bg-red-600 "></div>
         <img className="blur-3xl" src={gradientImage} alt="" />
         <div className=" flex content-between absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[40%] opacity-95 p-4 z-10 rounded">
           <div className=" mt-10 mr-5 bg-red-400 rounded-full">
@@ -151,7 +175,7 @@ function Display() {
               <h1 className="font-sans font-semibold text-3xl flex items-center justify-center">
                 {account ? account.name : ""}
                 <div className="ml-2">
-                  <RiVerifiedBadgeFill color="#249ef0" />
+                  {account?.is_verified ? <RiVerifiedBadgeFill color="#249ef0" /> : ""}
                 </div>
               </h1>
             </div>
@@ -161,8 +185,8 @@ function Display() {
         {/* -------------------About------------------- */}
         <div className="carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 h-full w-full flex flex-col items-center justify-center">
           <div className="mb-6">
-            <h3 className="text-xl font-semibold text-center mb-1">About</h3>
-            <p>{account.bio}</p>
+            <h3 className="font-sans text-xl font-semibold text-center mb-1">About</h3>
+            <p className="font-sans text-center px-10">{account?.bio ? account.bio : ""}</p>
           </div>
           <div className="flex justify-center flex-wrap w-[70%] text-lg font-normal">
             {account?.height && <Height value={account.height} />}
@@ -191,7 +215,7 @@ function Display() {
           <div className="carousel-images flex-shrink-0 w-1/2 bg-yellow-400">
             {/*  Image items go here  */}
             <img
-              src="https://img.freepik.com/free-photo/beautiful-girl-stands-near-walll-with-leaves_8353-5377.jpg?w=360&t=st=1704894620~exp=1704895220~hmac=8329ac8eb6c540aa1a5e8efa5a3ae7e46b3978435768cf5898400942e9d5e5d7"
+              src={account?.images ? account.images[1] ? `${IMAGE_URL}${account?.images[1]}` : `${IMAGE_URL}${account?.images[0]}` : ""}
               alt="Image 1"
               className="h-[100%] w-[100%] object-cover"
             />
@@ -205,8 +229,8 @@ function Display() {
               <div className="text-center flex justify-center content-center">
                 <FaQuoteRight />
               </div>
-              <h1 className="font-sans font-semibold text-xl flex items-center justify-center">
-                This is my prompt...!
+              <h1 className="font-sans font-semibold px-10 pt-2 text-xl flex items-center justify-center">
+                {account?.prompts ? account.prompts[0] : ""}
               </h1>
             </div>
           </div>

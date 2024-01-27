@@ -56,7 +56,7 @@ def create_fake_user(session):
         Prompt(id=str(uuid.uuid4()), prompt=fake.text()) for _ in range(fake.random_int(min=1, max=5))
     ]
     print('4\n')
-    user.interests = [UserInterests(
+    user.interests = UserInterests(
         id=str(uuid.uuid4()),
         workout=fake.random_element(
             elements=("Active", "Sometimes", "Almost", "Never")),
@@ -68,7 +68,7 @@ def create_fake_user(session):
             "Relationship", "Something Casual", "Don't know right now", "Marriage")),
         zodiac_sign=fake.random_element(elements=("Aries", "Taurus", "Gemini", "Cancer", "Leo",
                                                   "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"))
-    )]
+    )
     print('5\n')
     user.gallery = [
         UserGallery(id=str(uuid.uuid4()), image=fake.random_element(elements=("static/temp/F5aYIuyXYAAga0.jpg",

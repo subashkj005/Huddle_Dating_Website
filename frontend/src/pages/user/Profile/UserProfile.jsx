@@ -211,7 +211,7 @@ function UserProfile() {
   useEffect(() => {
     showLoading()
 
-    axiosInstance.get(`${USERS_URL}/${user_id}`)
+    axiosInstance.get(`${USERS_URL}/get_user_details/${user_id}`)
     .then((res)=>{
       setData(res.data)
       setPrompts(res.data.prompts)

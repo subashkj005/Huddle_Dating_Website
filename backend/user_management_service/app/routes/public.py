@@ -6,13 +6,13 @@ from app.config.database import db_dependency
 from app.fastmail.config import send_email_with_otp
 from app.models.faker_data import store_fake_data
 from app.schemas.schemas import RegisterUserRequest, OTPRequest, UserLoginRequest
-from app.models.models import User
+from app.models.models import User, UserInterestSettings
 from app.services.auth import get_user_login_token
 from app.config.security import generate_otp, hash_password, \
     is_password_strong_enough, verify_password, oauth2_scheme
 from app.redis.config import redis_instance
 from app.redis.controller import RedisController
-from app.models.enums import Role
+from app.models.enums import Gender, Role
 
 
 guest_router = APIRouter(
@@ -43,7 +43,7 @@ async def user_signup(user: RegisterUserRequest, db: db_dependency):
     user_key = f"temp_user:{user.email}"
 
     otp = generate_otp()
-    
+
     print('=============================')
     print(f"OTP: {otp}")
     print('=============================')
@@ -72,33 +72,39 @@ async def user_signup(user: RegisterUserRequest, db: db_dependency):
 async def otp_confimation(data: OTPRequest, db: db_dependency):
     # Key for getting user details
     user_key = f"temp_user:{data.email}"
-    
+
     print('\n data ==>', data)
     print('data.email ==>', data.email)
 
     redis = RedisController()
     result = redis.get_hash_data(user_key)
-    
+
     print('\n result ==>', result)
 
     if result["status"] == "error":
         return JSONResponse(status_code=400, content={"message": "OTP Expired"})
 
     user_details = result["data"]
-    
+
     if not user_details:
         return JSONResponse(status_code=400, content={"message": "OTP Expired"})
 
     if user_details["email"] != data.email or user_details["otp"] != data.otp:
         return JSONResponse(status_code=400, content={"message": "Invalid OTP"})
-    
+
     if data.otp is not None:
         if user_details["otp"] == data.otp:
             user = User(email=user_details["email"],
                         password=user_details["password"])
             db.add(user)
             db.commit()
-            db.refresh(user)
+
+            user.settings = UserInterestSettings(user_id=user.id,
+                                                 gender=Gender.FEMALE)
+
+            db.add(user)
+            db.commit()
+
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"message": "User created Successfully"})
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": "Invalid OTP"})
     return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": "Invalid request"})
@@ -108,7 +114,7 @@ async def otp_confimation(data: OTPRequest, db: db_dependency):
 async def user_login(data: UserLoginRequest, db: db_dependency):
 
     user = db.query(User).filter(User.email == data.email).first()
-    
+
     if not user:
         raise HTTPException(
             status_code=400, detail="Email is not registered with us.")
@@ -121,12 +127,12 @@ async def user_login(data: UserLoginRequest, db: db_dependency):
     if not user.is_active:
         raise HTTPException(
             status_code=400, detail="Your account has been deactivated. Please contact support.")
-        
+
     return await get_user_login_token(user, Role.USER.value)
 
 
 @guest_router.get('/add_users/{count}')
-def add_fake_users(db: db_dependency, count:str):
+def add_fake_users(db: db_dependency, count: str):
     users = store_fake_data(db, int(count))
     return users
 
@@ -140,19 +146,19 @@ async def add_image(request: Request):
     try:
         image = base64.b64decode(base64_str, validate=True)
         file_name = 'converted_image.jpg'
-        with open(file_name, "wb") as f: # Converting to image file
+        with open(file_name, "wb") as f:  # Converting to image file
             f.write(image)
-            
+
         print('typeofImage ==>', type(image))
     except binascii.Error as e:
         print(f"Error while image convertion: {e}")
-        
+
     try:
         destination = f"static/temp/{file_name}"
 
-        with open(destination, 'wb') as buffer: # Saving the image file
+        with open(destination, 'wb') as buffer:  # Saving the image file
             buffer.write(image)
-    except Exception as e :
+    except Exception as e:
         print(f'error while saving = {e}')
-        
-    return 
+
+    return

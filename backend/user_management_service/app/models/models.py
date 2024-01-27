@@ -53,7 +53,7 @@ class User(Base):
     prompts = relationship("Prompt", back_populates='user',
                            cascade="all, delete-orphan")
     interests = relationship(
-        "UserInterests", back_populates='user', cascade="all, delete-orphan")
+        "UserInterests", back_populates='user', uselist=False, cascade="all, delete-orphan")
     gallery = relationship(
         "UserGallery", back_populates='user', cascade="all, delete-orphan")
     settings = relationship(
