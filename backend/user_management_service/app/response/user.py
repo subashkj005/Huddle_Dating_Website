@@ -19,6 +19,7 @@ class ImageSchema(BaseModel):
 
 
 class UserSchema(BaseModel):
+    user_id: str
     name: str | None
     is_verified: bool | None
     height: int | None

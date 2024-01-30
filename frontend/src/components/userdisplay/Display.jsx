@@ -12,67 +12,84 @@ import Gender from "../badges/Gender";
 import "../../assets/styles/heart.css";
 import "../../assets/styles/carouselsAnimation.css";
 import heart from "../../assets/images/pink_heart.png";
+import loadingBg from "../../assets/images/huddle_loading_bg.jpg";
+import { toast as hottoast } from "react-hot-toast";
 import { MdCancel } from "react-icons/md";
 import { BsLightningFill } from "react-icons/bs";
 import fake_details from "../../temp_data/user_data";
 import { IMAGE_URL, USERS_URL } from "../../constants/urls";
 import UserSettings from "../userSettingsModal/UserSettings";
 import axiosInstance from "../../axios/axiosInstance";
-import { useSelector } from "react-redux";
-import useFetchRecommends from '../../hooks/useFetchRecommends'
+import useFetchRecommends from "../../hooks/useFetchRecommends";
+import useInterest from "../../hooks/useInterest";
 
 function Display() {
-
   const [
     data,
-    setData, 
-    account, 
-    setAccount, 
-    isLimitReached, 
-    setLimitReached,  
-    fetchMoreUsers] = useFetchRecommends();
-  const [accountIndex, setAccountIndex] = useState(0);
+    setData,
+    account,
+    setAccount,
+    isLimitReached,
+    setLimitReached,
+    accountIndex,
+    setAccountIndex,
+    fetchMoreUsers,
+  ] = useFetchRecommends();
+  const [handleLike, handleDislike] = useInterest();
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
-
-  console.log('data  =>', data)
 
   let counter = 0; // Counter for slider
   let lastScrollTime = 0; // Carousel scrolltime
 
-  const handleSlideChange = (movement) => {
+  const handleSlideChange = (movement, liked_id = null, disliked_id = null) => {
+    if (movement == "forward" && accountIndex < data?.length) {
+      if (liked_id) {
+        handleLike(liked_id);
+      }
 
-    if (movement == "forward" && accountIndex < data.length) {
+      if (disliked_id) {
+        handleDislike(disliked_id);
+      }
+
       setAccountIndex((prevState) => prevState + 1);
       setAnimation(true);
       setTimeout(() => {
         setAnimation(false);
       }, 500);
       setAccount(data[accountIndex]);
-      console.log('a/c index =', accountIndex)
+      console.log("a/c index =", accountIndex);
 
-      if (!isLimitReached && accountIndex == (data.length - 5)){
-        console.log('calling for fetching more users')
-        fetchMoreUsers()
+      if (!isLimitReached && accountIndex == data?.length - 5) {
+        console.log("calling for fetching more users");
+        fetchMoreUsers();
       }
 
-      if (data.length > 20) {
-        let accounts = data
-        const sliced_accounts = accounts.slice(10)
-        setData(sliced_accounts)
-        setAccountIndex(prevState => prevState - 10)
-        
+      if (data?.length > 20) {
+        let accounts = data;
+        const sliced_accounts = accounts.slice(10);
+        setData(sliced_accounts);
+        setAccountIndex((prevState) => prevState - 10);
       }
 
-    } else if (movement == "backward" && accountIndex > -1) {
+      console.log("account = ", account?.user_id, account?.name);
+    } else if (movement == "backward" && accountIndex >= 0) {
+      
+      if (accountIndex === 0) {
+        hottoast("Reached end", {
+          icon: "❗️",
+          position: "top-center",
+        });
+      }
+
       setAccountIndex((prevState) => prevState - 1);
       setAnimation(true);
       setTimeout(() => {
         setAnimation(false);
       }, 1000);
 
-      setAccount(data[accountIndex]);
-  
+      setAccount(data[accountIndex-1]);
+      console.log('a/c index bwd =', accountIndex)
     }
     handleSlidePosition();
   };
@@ -84,7 +101,6 @@ function Display() {
   };
 
   useEffect(() => {
-
     const carousel = document.getElementById("carousel");
     const contentSlides = carousel.querySelectorAll(".carousel-wrapper");
     setSlides(contentSlides);
@@ -126,10 +142,27 @@ function Display() {
           animation ? "animate" : ""
         } relative overflow-hidden flex flex-col overflow-y-hidden w-[68%] h-[94%] rounded-[10px] bg-white shadow-2xl`}
       >
-        <div className="bg-red-600 "></div>
+        <div
+          className={`loading-div z-20 w-full h-full relative ${
+            data?.length !== 0 ? "hidden" : ""
+          }`}
+        >
+          <div className="rhombus absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="circle1"></div>
+            <div className="circle2"></div>
+          </div>
+          <img
+            className=" object-cover w-screen h-screen"
+            src={loadingBg}
+            alt=""
+          />
+        </div>
         <img className="blur-3xl" src={gradientImage} alt="" />
         <div className=" flex content-between absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[40%] opacity-95 p-4 z-10 rounded">
-          <div className=" mt-10 mr-5 bg-red-400 rounded-full">
+          <div
+            className=" mt-10 mr-5 bg-red-400 rounded-full"
+            onClick={() => handleSlideChange("forward", null, account?.user_id)}
+          >
             <MdCancel color="white" size={88} className="hover:text-red-500" />
           </div>
           <div className=" mb-10 bg-red-400 rounded-full">
@@ -140,7 +173,7 @@ function Display() {
               className="heart"
               src={heart}
               alt=""
-              onClick={() => handleSlideChange("forward")}
+              onClick={() => handleSlideChange("forward", account?.user_id, null)}
             />
           </div>
         </div>
@@ -152,7 +185,7 @@ function Display() {
           } transition duration-500 ease-in-out absolute top-0 left-0 flex items-center justify-center w-[100%]`}
         >
           {/*  Left side for images  */}
-          <div className="carousel-images flex-shrink-0 w-1/2 bg-yellow-400">
+          <div className="carousel-images flex-shrink-0 w-1/2 bg-yellow-400 max-h-[100%]">
             {/*  Image items go here  */}
             <img
               src={
@@ -173,9 +206,15 @@ function Display() {
             {/* <!-- Text or content items go here --> */}
             <div className="text-content ">
               <h1 className="font-sans font-semibold text-3xl flex items-center justify-center">
-                {account ? account.name : ""}
+                {account ? account.name : ""} ,
+                <div
+                  className="ml-2 font-bold text-4xl"
+                  style={{ fontFamily: "'Chivo', sans-serif" }}
+                >
+                  {account?.age ? account.age : ""}
+                </div>
                 <div className="ml-2">
-                  {account?.is_verified ? <RiVerifiedBadgeFill color="#249ef0" /> : ""}
+                  {<RiVerifiedBadgeFill color="#249ef0" />}
                 </div>
               </h1>
             </div>
@@ -185,8 +224,12 @@ function Display() {
         {/* -------------------About------------------- */}
         <div className="carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 h-full w-full flex flex-col items-center justify-center">
           <div className="mb-6">
-            <h3 className="font-sans text-xl font-semibold text-center mb-1">About</h3>
-            <p className="font-sans text-center px-10">{account?.bio ? account.bio : ""}</p>
+            <h3 className="font-sans text-xl font-semibold text-center mb-1">
+              About
+            </h3>
+            <p className="font-sans text-center px-10">
+              {account?.bio ? account.bio : ""}
+            </p>
           </div>
           <div className="flex justify-center flex-wrap w-[70%] text-lg font-normal">
             {account?.height && <Height value={account.height} />}
@@ -210,12 +253,18 @@ function Display() {
         </div>
 
         {/* -------------------prompt------------------- */}
-        <div className="carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 flex items-center justify-center w-[100%] mt-6">
+        <div className="carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 h-full w-full flex items-center justify-center">
           {/*  Left side for images  */}
-          <div className="carousel-images flex-shrink-0 w-1/2 bg-yellow-400">
+          <div className="carousel-images flex-shrink-0 w-1/2 bg-yellow-400 max-h-[100%]">
             {/*  Image items go here  */}
             <img
-              src={account?.images ? account.images[1] ? `${IMAGE_URL}${account?.images[1]}` : `${IMAGE_URL}${account?.images[0]}` : ""}
+              src={
+                account?.images
+                  ? account.images[1]
+                    ? `${IMAGE_URL}${account?.images[1]}`
+                    : `${IMAGE_URL}${account?.images[0]}`
+                  : ""
+              }
               alt="Image 1"
               className="h-[100%] w-[100%] object-cover"
             />

@@ -9,6 +9,7 @@ function useFetchRecommends() {
   const [account, setAccount] = useState([]);
   const batchNumber = useRef(1) //Initially it will be 1, when increment it will act as desired value
   const [isLimitReached, setLimitReached] = useState(false)
+  const [accountIndex, setAccountIndex] = useState(0);
   const userId = useSelector((state) => state.logUser.user.id);
 
 
@@ -32,7 +33,7 @@ function useFetchRecommends() {
     const fetchedUsers = await getRecommendations(fetchParams)
     setData((prevData)=> [...prevData, ...fetchedUsers])
 
-    if (fetchedUsers.length < 10) {
+    if (fetchedUsers?.length < 10) {
         setLimitReached(true)
     }else {
         setLimitReached(false)
@@ -41,19 +42,19 @@ function useFetchRecommends() {
   };
 
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const recommendations = await getRecommendations();
 
         setData(recommendations);
         setAccount(recommendations && recommendations[0]);
+        setAccountIndex(1)
 
-        if (recommendations.length < 10){
+        if (recommendations?.length < 10){
             setLimitReached(true)
-            console.log('limitboolean after fetching INITIAL users =', isLimitReached)
         }else{
             setLimitReached(false)
-            console.log('limitboolean after fetching INITIAL users =', isLimitReached)
         }
       } catch (error) {
         console.error("Error fetching recommendations:", error);
@@ -61,6 +62,7 @@ function useFetchRecommends() {
     };
 
     fetchData();
+
   },[]);
 
   return [
@@ -70,6 +72,8 @@ function useFetchRecommends() {
     setAccount, 
     isLimitReached, 
     setLimitReached,
+    accountIndex,
+    setAccountIndex,
     fetchMoreUsers]
 }
 

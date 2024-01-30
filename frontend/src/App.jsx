@@ -15,36 +15,45 @@ import { Toaster } from "react-hot-toast";
 import AdminOTP from "./pages/admin/otp/AdminOTP";
 import { ADMIN_AUTH } from "./constants/admin_urls";
 import NewFile from "./pages/user/Profile/NewFile";
+import InitialAuth from "./utils/route_auth/InitialAuth";
+import UserAuthRoute from "./utils/route_auth/UserAuthRoute";
+import AdminAuthRoute from "./utils/route_auth/AdminAuthRoute";
 
 function App() {
   return (
-      <LoadingProvider>
-        <HashLoadingScreen />
-        <div className="App">
-          <ToastContainer hideProgressBar={true} autoClose={3000} />
-          <Toaster position="bottom-center" reverseOrder={false} />
-          <Router>
-            <Routes>
-              <Route path="/">
-                {/* User */}
-                <Route index element={<LoginPage />} />
-                <Route path="signup" element={<SignupPage />} />
-                <Route path="signup/otp" element={<OTPVerification />} />
-                <Route path="profile" element={<UserProfile />} />
-                <Route path="home" element={<UserHome />} />
-                <Route path="image" element={<NewFile />} />
-                {/* Admin */}
-                <Route path="admin">
-                  <Route index element={<AdminLogin />} />
-                  <Route path="home" element={<AdminHome />} />
-                  <Route path="signup" element={<AdminRegister />} />
-                  <Route path="signup/otp" element={<AdminOTP />} />
-                </Route>
+    <LoadingProvider>
+      <HashLoadingScreen />
+      <div className="App">
+        <ToastContainer hideProgressBar={true} autoClose={3000} />
+        <Toaster position="bottom-center" reverseOrder={false} />
+        <Router>
+          <Routes>
+            <Route path="/" element={<InitialAuth />}>
+              {/* User Auth*/}
+              <Route index element={<LoginPage />} />
+              <Route path="signup" element={<SignupPage />} />
+              <Route path="signup/otp" element={<OTPVerification />} />
+              {/* Admin  Auth*/}
+              <Route path="adminAuth">
+                <Route index element={<AdminLogin />} />
+                <Route path="signup/otp" element={<AdminOTP />} />
+                <Route path="signup" element={<AdminRegister />} />
               </Route>
-            </Routes>
-          </Router>
-        </div>
-      </LoadingProvider>
+            </Route>
+            {/* User Routes */}
+            <Route path="user" element={<UserAuthRoute />}>
+              <Route index element={<UserHome />} />
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="image" element={<NewFile />} />
+            </Route>
+            {/* Admin */}
+            <Route path="admin" element={<AdminAuthRoute />}>
+              <Route index element={<AdminHome />} />
+            </Route>
+          </Routes>
+        </Router>
+      </div>
+    </LoadingProvider>
   );
 }
 

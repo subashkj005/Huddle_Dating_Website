@@ -12,6 +12,7 @@ import {
 import axiosInstance from "../../axios/axiosInstance";
 import { USERS_URL } from "../../constants/urls";
 import { toast as hottoast } from "react-hot-toast";
+import batchNumber from '../../hooks/useFetchRecommends'
 
 
 function UserSettings() {
@@ -40,6 +41,9 @@ function UserSettings() {
       .then((res) => {
         if (res.status == 200) {
           hottoast.success("Settings updated");
+          // reset the batch number to query the user from the beginning
+          batchNumber.current = 1
+
         }
       })
       .catch((err) => {

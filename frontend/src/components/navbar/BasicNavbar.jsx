@@ -82,7 +82,7 @@ function BasicNavbar({ image }) {
                     <span className="ml-2 text-sm ">{name}</span>
                   </label>
                   <div className="dropdown-menu dropdown-menu-bottom-left">
-                    <Link to="/profile" className="dropdown-item text-sm">
+                    <Link to="/user/profile" className="dropdown-item text-sm">
                       Profile
                     </Link>
                     <label

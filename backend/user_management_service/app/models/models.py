@@ -152,4 +152,48 @@ class Visit(Base):
     
     user = relationship("User", back_populates='visits', foreign_keys="[Visit.visitor_id, Visit.visited_id]",
                        primaryjoin="User.id == Visit.visitor_id")
+    
+    
+class UserInterestedAccounts(Base):
+    __tablename__ = 'interested_accounts'
+    
+    id = Column(String(36), primary_key=True, default=str(
+        uuid.uuid4()), unique=True, nullable=False)
+    liker_id = Column(String(36), ForeignKey('users.id'), key='liker_id', nullable=False)
+    liked_by = Column(String(36), ForeignKey('users.id'), key='likes_id', nullable=False)
+    liked_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", 
+                        foreign_keys="[UserInterestedAccounts.liker_id, UserInterestedAccounts.liked_by]", 
+                        primaryjoin="User.id == UserInterestedAccounts.liker_id", backref='interested_accounts')
+    
+    
+class BlacklistUsers(Base):
+    __tablename__ = 'blacklists'
+    
+    id = Column(String(36), primary_key=True, default=str(
+        uuid.uuid4()), unique=True, nullable=False)
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    disliked_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    
+    user = relationship("User",
+                        foreign_keys="[BlacklistUsers.user_id, BlacklistUsers.disliked_id]", 
+                        primaryjoin="User.id == BlacklistUsers.user_id",
+                        backref='blacklists')
+    
+    
+class Matchings(Base):
+    __tablename__ = 'matchings'
+    
+    id = Column(String(36), primary_key=True, default=str(
+        uuid.uuid4()), unique=True, nullable=False)
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    matched_user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    
+    user = relationship("User",
+                        foreign_keys="[Matchings.user_id, Matchings.matched_user_id]", 
+                        primaryjoin="User.id == Matchings.user_id",
+                        backref='matchings')
+ 
+ 
  

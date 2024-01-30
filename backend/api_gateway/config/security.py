@@ -1,6 +1,5 @@
 from flask import jsonify, make_response
-from datetime import timedelta
-import datetime
+from datetime import datetime, timedelta
 from jose import ExpiredSignatureError, JWTError, jwt
 from config.settings import get_settings
 from services.logger import logger
@@ -27,7 +26,7 @@ def create_new_access_token(refresh_token):
 
 def create_access_token(data):
     payload = data.copy()
-    expiry = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    expiry = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     expire_in = datetime.utcnow() + expiry
     payload.update({"exp": expire_in})
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
@@ -48,6 +47,7 @@ def validate_token(access_token):
     try:
         payload = jwt.decode(access_token, settings.JWT_SECRET,
                              algorithms=settings.JWT_ALGORITHM)
+        print('payload of access token = ', payload)
         return None, payload
     except ExpiredSignatureError:
         logger.error('Access token expired')
