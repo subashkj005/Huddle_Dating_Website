@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import logo from "../../assets/images/logo_png_hd-cropped.png";
 import avatar from "../../assets/images/avatar.jpg";
 import { IoIosNotifications } from "react-icons/io";
 import { useSelector, useDispatch } from "react-redux";
 import { loggedOut } from "../../redux/slices/logSlice";
 import { useNavigate, Link } from "react-router-dom";
+import { socketConnection } from "../../socket/socketConfig";
+
 
 function BasicNavbar({ image }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { name } = useSelector((state) => state?.logUser?.user);
+  const { name, id } = useSelector((state) => state?.logUser?.user);
   const notificationCount = 10;
   const signoutPrompts = [
     "Ready to sign out? Or perhaps there's another profile waiting for your attention? 💌",
@@ -25,12 +27,18 @@ function BasicNavbar({ image }) {
     navigate("/");
   };
 
+  useEffect(()=>{
+    if (id) {
+      socketConnection()
+    }
+  }, [id])
+
   return (
     <>
       <div className="navbar rounded-lg">
         <div className="navbar-start">
           
-          <Link className="navbar-item" to='/home'>
+          <Link className="navbar-item" to='/user'>
             <img src={logo} style={{ width: "7rem" }} alt="logo" />
             </Link>
         </div>

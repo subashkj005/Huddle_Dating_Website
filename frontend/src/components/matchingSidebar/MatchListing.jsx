@@ -1,5 +1,6 @@
 import React from "react";
 import { Avatar } from "@nextui-org/react";
+import MatchedModal from "../modals/MatchedModal";
 
 function MatchListing() {
   return (
@@ -37,6 +38,8 @@ function MatchListing() {
           </div>
         </div>
       </div>
+
+      <MatchedModal />
     </>
   );
 }

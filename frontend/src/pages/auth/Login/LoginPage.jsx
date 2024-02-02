@@ -12,12 +12,6 @@ import { loggedIn } from '../../../redux/slices/logSlice';
 import { storeSettings } from '../../../redux/slices/userSettingSlice';
 
 
-
-
-
-
-
-
 function LoginPage() {
 
     const [email, setEmail] = useState("")

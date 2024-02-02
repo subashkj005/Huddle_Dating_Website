@@ -46,16 +46,12 @@ async def _get_user_token(user: User, refresh_token=None, role=None):
     access_token_expiry = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(payload, access_token_expiry)
-    print('access token expiry =', access_token_expiry)
-    print('access token =', access_token)
 
     if not refresh_token:
         refresh_token_expiry = timedelta(
         minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
         refresh_token = create_refresh_token(payload, refresh_token_expiry)
         set_refresh_token(refresh_token, payload)
-        print('refresh token expiry =', refresh_token_expiry)
-        print('refresh token =', refresh_token)
 
     return access_token
 

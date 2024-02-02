@@ -55,9 +55,9 @@ function UserSettings() {
   useEffect(()=>{
     axiosInstance.get(`${USERS_URL}/get_settings/${userId}`)
     .then((res)=>{
-      setAge([res.data.min_age, res.data.max_age])
-      setDistance(res.data.distance)
-      setGender(res.data.gender)
+      setAge([res?.data.min_age, res?.data.max_age])
+      setDistance(res?.data.distance)
+      setGender(res?.data.gender)
     })
   }, [])
 

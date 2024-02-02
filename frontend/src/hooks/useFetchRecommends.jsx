@@ -18,7 +18,7 @@ function useFetchRecommends() {
       const res = await axiosInstance.get(
         `${USERS_URL}/recommendations/${userId}`, { params: fetchParams } 
       );
-      return res.data;
+      return res?.data;
     } catch (error) {
         console.error("Error fetching recommendations:", error);
     }

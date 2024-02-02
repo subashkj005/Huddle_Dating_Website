@@ -23,6 +23,7 @@ function App() {
   return (
     <LoadingProvider>
       <HashLoadingScreen />
+      
       <div className="App">
         <ToastContainer hideProgressBar={true} autoClose={3000} />
         <Toaster position="bottom-center" reverseOrder={false} />

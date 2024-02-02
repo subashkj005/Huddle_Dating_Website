@@ -7,10 +7,11 @@ const user = useSelector((state) => state.logUser.user);
 const dispatch = useDispatch();
 
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
+
+    console.log('error at the interceptor = ', error)
+
     const { response } = error;
 
     if (response) {
@@ -31,12 +32,13 @@ axiosInstance.interceptors.response.use(
       }
 
       if (response.status === 401) {
+        console.log('interceptor catched the 401 error')
         if (user.role === "user") {
-          <Navigate to="/" />;
+          window.location.href = '/';
         } else if (user.role === "admin") {
-          <Navigate to="/adminAuth" />;
+          window.location.href = '/adminAuth';
         } else {
-          <Navigate to="/" />;
+          window.location.href = '/';
         }
 
         dispatch(loggedOut);
@@ -53,5 +55,6 @@ axiosInstance.interceptors.response.use(
         console.log("INTERCEPTOR == INTERNAL SERVER ERROR");
       }
     }
+    return Promise.reject(error);
   }
 );

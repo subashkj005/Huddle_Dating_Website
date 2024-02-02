@@ -13,6 +13,7 @@ from app.config.security import generate_otp, hash_password, \
 from app.redis.config import redis_instance
 from app.redis.controller import RedisController
 from app.models.enums import Gender, Role
+from socket_config.socket import match_found
 
 
 guest_router = APIRouter(
@@ -112,7 +113,7 @@ async def otp_confimation(data: OTPRequest, db: db_dependency):
 
 @guest_router.post('/login')
 async def user_login(data: UserLoginRequest, db: db_dependency):
-
+    print('calling login server func')
     user = db.query(User).filter(User.email == data.email).first()
 
     if not user:
@@ -132,9 +133,10 @@ async def user_login(data: UserLoginRequest, db: db_dependency):
 
 
 @guest_router.get('/add_users/{count}')
-def add_fake_users(db: db_dependency, count: str):
-    users = store_fake_data(db, int(count))
-    return users
+async def add_fake_users(db: db_dependency, count: str):
+    # users = store_fake_data(db, int(count))
+    # return users
+    await match_found('88526893-0a4d-4259-8168-29e219507cda', {'match_found':'sample data ============='})
 
 
 @guest_router.post('/add_image')

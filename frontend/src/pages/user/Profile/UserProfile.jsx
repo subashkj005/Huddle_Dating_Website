@@ -5,8 +5,8 @@ import { createFormData } from "../../../utils/fileManagement/fileUpload";
 import axiosInstance from "../../../axios/axiosInstance";
 import { IMAGE_URL, USERS_URL } from "../../../constants/urls";
 import { toast } from "react-toastify";
-import {toast as hottoast} from 'react-hot-toast';
-import { v4 as uuidv4 } from 'uuid';
+import { toast as hottoast } from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
 import {
   RiAddLine,
   RiArrowDownSFill,
@@ -17,30 +17,36 @@ import {
 import { LoadingContext } from "../../../context/LoadingContext";
 import { useSelector } from "react-redux";
 import validateImage from "../../../utils/fileManagement/imageValidations";
+import ProfilePictureModal from "../../../components/modals/ProfilePictureModal";
 
 function UserProfile() {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const user_id = useSelector((state) => state.logUser.user.id);
+
+  const [modalOpen, setModalOpen] = useState(false);
   const [data, setData] = useState(null);
-
   const [formData, setFormData] = useState({});
-
-  const [prompts, setPrompts] = useState([])
+  const [prompts, setPrompts] = useState([]);
   const [images, setImages] = useState([]);
   const [imagesLink, setImagesLink] = useState([]);
   const [profile_picture, setProfilePicture] = useState(null);
   const [profileLink, setProfileLink] = useState(null);
-  const [tempPrompt, setTempPrompt] = useState('');
+  const [tempPrompt, setTempPrompt] = useState("");
   const [isPromptEdit, setIsPromptEdit] = useState(false);
   const [editingPromptId, setEditingPromptId] = useState(null);
+  console.log('profile_picture', profile_picture)
+
+  const updateAvatar = (image) => {
+    setProfilePicture(image);
+  };
 
   const handleProfileImageChange = (event) => {
     const file = event.target.files[0];
     const validation = validateImage(file);
 
     if (!validation.valid) {
-        toast.warning(validation.message);
-        return;
+      toast.warning(validation.message);
+      return;
     }
 
     if (file) {
@@ -54,13 +60,12 @@ function UserProfile() {
   };
 
   const handleGalleryImageChange = (event, index) => {
-    
     const file = event.target.files[0];
     const validation = validateImage(file);
 
     if (!validation.valid) {
-        toast.warning(validation.message);
-        return;
+      toast.warning(validation.message);
+      return;
     }
 
     if (file) {
@@ -70,42 +75,44 @@ function UserProfile() {
         const newImagesLink = [...imagesLink];
 
         if (index !== undefined && index !== null) {
-          console.log('index is getting')
-          newImages[index].image = file
+          console.log("index is getting");
+          newImages[index].image = file;
           newImagesLink[index] = reader.result;
-          
         } else {
-
-          const newImage_obj = {id: uuidv4(), image: file}
-          newImages[newImages.length] = newImage_obj
+          const newImage_obj = { id: uuidv4(), image: file };
+          newImages[newImages.length] = newImage_obj;
           newImagesLink[newImagesLink.length] = reader.result;
         }
 
         setImages(newImages);
         setImagesLink(newImagesLink);
-        console.log(images, 'images')
+        console.log(images, "images");
       };
       reader.readAsDataURL(file);
     }
-    console.log(imagesLink, 'imagesLink')
+    console.log(imagesLink, "imagesLink");
   };
 
   const handleValueChange = (e) => {
-
     const { name, value } = e.target;
-  
-    setFormData((prevData) => {
 
+    setFormData((prevData) => {
       const prevWorks = prevData.works || [];
-  
+
       if (name === "title" || name === "company") {
-        console.log('getting inside checking function');
+        console.log("getting inside checking function");
         return {
           ...prevData,
           works: [
             {
-              title: name === "title" ? value : prevWorks[0]?.title || data.works.title || "",
-              company: name === "company" ? value : prevWorks[0]?.company || data.works.company || "",
+              title:
+                name === "title"
+                  ? value
+                  : prevWorks[0]?.title || data.works.title || "",
+              company:
+                name === "company"
+                  ? value
+                  : prevWorks[0]?.company || data.works.company || "",
             },
           ],
         };
@@ -116,12 +123,9 @@ function UserProfile() {
         };
       }
     });
-  
-    console.log('formdata updated = ', formData);
+
+    console.log("formdata updated = ", formData);
   };
-  
-  
-  
 
   const editPrompt = (prompt, index) => {
     setTempPrompt(prompt);
@@ -141,30 +145,29 @@ function UserProfile() {
       return false;
     }
     prompts.push({ prompt: tempPrompt });
-    setFormData((prevData)=>({...prevData, prompts: prompts}))
+    setFormData((prevData) => ({ ...prevData, prompts: prompts }));
     setTempPrompt("");
-    console.log('FORMDATA ==', formData)
+    console.log("FORMDATA ==", formData);
   };
 
   const updatePrompt = (index) => {
     const updatedPrompts = prompts.map((item, i) =>
       i === index ? { ...item, prompt: tempPrompt.prompt } : item
     );
-  
+
     setPrompts(updatedPrompts);
-    setFormData((prevData)=>({...prevData, prompts: updatedPrompts}))
+    setFormData((prevData) => ({ ...prevData, prompts: updatedPrompts }));
     setIsPromptEdit(false);
     setEditingPromptId(null);
-    console.log('FORMDATA ==', formData)
+    console.log("FORMDATA ==", formData);
   };
 
   const deletePrompt = (index) => {
-  setPrompts((prevPrompts) => prevPrompts.filter((item, i) => i !== index));
-  setFormData((prevData)=>({...prevData, prompts: prompts}))
-  toast.success("Prompt deleted successfully");
-  console.log('FORMDATA ==', formData)
-};
-
+    setPrompts((prevPrompts) => prevPrompts.filter((item, i) => i !== index));
+    setFormData((prevData) => ({ ...prevData, prompts: prompts }));
+    toast.success("Prompt deleted successfully");
+    console.log("FORMDATA ==", formData);
+  };
 
   const handleSubmit = () => {
     // if ((!formData.name || !data.user.name) || (!formData.date_of_birth || !data.user.date_of_birth) || (!formData.gender || !data.user.gender) || (!formData.interested_in || !data.user.interested_in)) {
@@ -172,66 +175,75 @@ function UserProfile() {
     //   return null;
     // }
 
-    let data = createFormData({ ...formData, prompts, profile_picture }, images);
+    let data = createFormData(
+      { ...formData, prompts, profile_picture },
+      images
+    );
 
     showLoading();
 
-    const promise = axiosInstance
-      .post(
-        `http://localhost:7614/users/profileupdate/?user_id=${user_id}`,
-        data
-      )
+    const promise = axiosInstance.post(
+      `http://localhost:7614/users/profileupdate/?user_id=${user_id}`,
+      data
+    );
 
-      hottoast.promise(promise,{
-        loading: 'Updating profile...',
+    hottoast.promise(
+      promise,
+      {
+        loading: "Updating profile...",
         success: "Updated successfully",
-        error: "Unable to update profile"
+        error: "Unable to update profile",
       },
       {
         style: {
-          minWidth: '250px',
+          minWidth: "250px",
         },
         success: {
           duration: 3000,
-          icon: '✅',
+          icon: "✅",
         },
         timeout: 5000,
-      })
-      
+      }
+    );
 
-      promise
-        .catch((err) => {
-          console.log('ERR ===>\n',err);
-        })
-        .finally(() => {
-          hideLoading();
-        });
+    promise
+      .catch((err) => {
+        console.log("ERR ===>\n", err);
+      })
+      .finally(() => {
+        hideLoading();
+      });
   };
 
   useEffect(() => {
-    showLoading()
+    showLoading();
 
-    axiosInstance.get(`${USERS_URL}/get_user_details/${user_id}`)
-    .then((res)=>{
-      setData(res.data)
-      setPrompts(res.data.prompts)
-      setImages(res.data.gallery)
-      console.log(res, 'SUCCESS')
-      
-    })
-    .catch((err)=>{
-      console.log(err, 'err');
-
-    })
-    .finally(()=>{
-      hideLoading()
-      console.log(formData, 'formdata');
-    })
+    axiosInstance
+      .get(`${USERS_URL}/get_user_details/${user_id}`)
+      .then((res) => {
+        setData(res.data);
+        setPrompts(res.data.prompts);
+        setImages(res.data.gallery);
+        console.log(res, "SUCCESS");
+      })
+      .catch((err) => {
+        console.log(err, "err");
+      })
+      .finally(() => {
+        hideLoading();
+        console.log(formData, "formdata");
+      });
   }, []);
 
   return (
     <>
       <BasicNavbar />
+      {modalOpen && (
+        <ProfilePictureModal
+          updateAvatar={updateAvatar}
+          closeModal={() => setModalOpen(false)}
+        />
+      )}
 
       <div className="mx-auto lg:w-[70%] ">
         <div className="flex flex-col lg:flex-row ">
@@ -256,7 +268,11 @@ function UserProfile() {
                 type="text"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="phone_number"
-                value={formData?.phone_number ? formData.phone_number : data?.user.phone_number}
+                value={
+                  formData?.phone_number
+                    ? formData.phone_number
+                    : data?.user.phone_number
+                }
                 onChange={handleValueChange}
               />
             </div>
@@ -295,7 +311,11 @@ function UserProfile() {
               <select
                 className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="interested_in"
-                value={formData?.interested_in ? formData.interested_in : data?.user.interested_in}
+                value={
+                  formData?.interested_in
+                    ? formData.interested_in
+                    : data?.user.interested_in
+                }
                 onChange={handleValueChange}
               >
                 <option value="">Choose</option>
@@ -311,13 +331,17 @@ function UserProfile() {
               <select
                 className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="education_level"
-                value={formData?.education_level ? formData.education_level : data?.user.education_level}
+                value={
+                  formData?.education_level
+                    ? formData.education_level
+                    : data?.user.education_level
+                }
                 onChange={handleValueChange}
               >
                 <option value="">Choose</option>
                 <option value="High School">High School</option>
                 <option value="Trade / Tech">Trade / Tech</option>
-                <option value="Incollege">In  college</option>
+                <option value="Incollege">In college</option>
                 <option value="Diploma">Diploma</option>
                 <option value="Graduate">Graduate</option>
                 <option value="Postgraduate">Postgraduate</option>
@@ -355,7 +379,9 @@ function UserProfile() {
                 type="text"
                 className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                 name="location"
-                value={formData?.location ? formData.location : data?.user.location}
+                value={
+                  formData?.location ? formData.location : data?.user.location
+                }
                 onChange={handleValueChange}
               />
             </div>
@@ -385,7 +411,11 @@ function UserProfile() {
                         <select
                           className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="workout"
-                          value={formData?.workout ? formData.workout : data?.interests.workout}
+                          value={
+                            formData?.workout
+                              ? formData.workout
+                              : data?.interests.workout
+                          }
                           onChange={handleValueChange}
                         >
                           <option value="">Choose</option>
@@ -402,7 +432,11 @@ function UserProfile() {
                         <select
                           className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="drinks"
-                          value={formData?.drinks ? formData.drinks : data?.interests.drinks}
+                          value={
+                            formData?.drinks
+                              ? formData.drinks
+                              : data?.interests.drinks
+                          }
                           onChange={handleValueChange}
                         >
                           <option value="">Choose</option>
@@ -419,7 +453,11 @@ function UserProfile() {
                         <select
                           className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="smoking"
-                          value={formData?.smoking ? formData.smoking : data?.interests.smoking}
+                          value={
+                            formData?.smoking
+                              ? formData.smoking
+                              : data?.interests.smoking
+                          }
                           onChange={handleValueChange}
                         >
                           <option value="">Choose</option>
@@ -436,7 +474,11 @@ function UserProfile() {
                         <select
                           className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="dating_purpose"
-                          value={formData?.dating_purpose ? formData.dating_purpose : data?.interests.dating_purpose}
+                          value={
+                            formData?.dating_purpose
+                              ? formData.dating_purpose
+                              : data?.interests.dating_purpose
+                          }
                           onChange={handleValueChange}
                         >
                           <option value="">Choose</option>
@@ -457,7 +499,11 @@ function UserProfile() {
                         <select
                           className="select bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="zodiac_sign"
-                          value={formData?.zodiac_sign ? formData.zodiac_sign : data?.interests.zodiac_sign}
+                          value={
+                            formData?.zodiac_sign
+                              ? formData.zodiac_sign
+                              : data?.interests.zodiac_sign
+                          }
                           onChange={handleValueChange}
                         >
                           <option value="">Choose</option>
@@ -492,24 +538,28 @@ function UserProfile() {
           <div className=" lg:w-[60%] lg:ml-5">
             <div className="my-2 mt-4">
               <h3 className="mb-4">Profile Picture</h3>
-              {profileLink || data?.user.profile_picture ? (
+              {profile_picture || data?.user.profile_picture ? (
                 <label>
                   <img
                     className=" h-[40%] w-[30%] rounded-xl shadow-[14px_4px_20px_0px_#cfcfcf]"
-                    src={profileLink ? profileLink : `${IMAGE_URL}${data?.user.profile_picture}`}
-                  />
-                  <input
-                    type="file"
-                    name="profile"
-                    className="input-file hidden cursor-pointer"
-                    onChange={handleProfileImageChange}
+                    onClick={() => setModalOpen(true)}
+                    src={
+                      profile_picture
+                        ? URL.createObjectURL(profile_picture)
+                        : `${IMAGE_URL}${data?.user.profile_picture}`
+                    }
                   />
                 </label>
               ) : (
-                <ImageUpload
-                  handleImageChange={handleProfileImageChange}
-                  name="profile"
-                />
+                <label
+                  className="p-10 bg-[rgb(233,233,233)] flex items-center
+                             justify-center rounded-xl outline-3 outline-[#fd7ab7]
+                             outline-dashed text-[#fc449a] text-center text-2xl
+                             font-extrabold"
+                  onClick={() => setModalOpen(true)}
+                >
+                  +
+                </label>
               )}
             </div>
             <div className="my-4">
@@ -519,7 +569,11 @@ function UserProfile() {
                   <label>
                     <img
                       className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
-                      src={images[0] && typeof images[0].image !== 'string' ? URL.createObjectURL(images[0].image) : `${IMAGE_URL}${images[0].image}`} 
+                      src={
+                        images[0] && typeof images[0].image !== "string"
+                          ? URL.createObjectURL(images[0].image)
+                          : `${IMAGE_URL}${images[0].image}`
+                      }
                     />
                     <input
                       type="file"
@@ -538,7 +592,11 @@ function UserProfile() {
                   <label>
                     <img
                       className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
-                      src={images[1] && typeof images[1].image !== 'string' ? URL.createObjectURL(images[1].image) : `${IMAGE_URL}${images[1].image}`}
+                      src={
+                        images[1] && typeof images[1].image !== "string"
+                          ? URL.createObjectURL(images[1].image)
+                          : `${IMAGE_URL}${images[1].image}`
+                      }
                     />
                     <input
                       type="file"
@@ -557,7 +615,11 @@ function UserProfile() {
                   <label>
                     <img
                       className="rounded-xl outline-3 outline-slate-400 outline-dashed shadow-[14px_4px_20px_0px_#cfcfcf]"
-                      src={images[2] && typeof images[2].image !== 'string' ? URL.createObjectURL(images[2].image) : `${IMAGE_URL}${images[2].image}`}
+                      src={
+                        images[2] && typeof images[2].image !== "string"
+                          ? URL.createObjectURL(images[2].image)
+                          : `${IMAGE_URL}${images[2].image}`
+                      }
                     />
                     <input
                       type="file"
@@ -614,7 +676,11 @@ function UserProfile() {
                           type="text"
                           className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="title"
-                          value={formData?.works ? formData?.works[0]?.title : data?.works.title}
+                          value={
+                            formData?.works
+                              ? formData?.works[0]?.title
+                              : data?.works.title
+                          }
                           onChange={handleValueChange}
                         />
                       </div>
@@ -626,7 +692,11 @@ function UserProfile() {
                           type="text"
                           className="input bg-transparent focus:border-[hsl(332,100%,85%)]"
                           name="company"
-                          value={formData?.works ? formData?.works[0]?.company : data?.works.company}
+                          value={
+                            formData?.works
+                              ? formData?.works[0]?.company
+                              : data?.works.company
+                          }
                           onChange={handleValueChange}
                         />
                       </div>
