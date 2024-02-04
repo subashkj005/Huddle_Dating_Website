@@ -11,7 +11,7 @@ def add_connection(connection):
         print('Socket connection added Successfully')
     else:
         print('Unable to add socket connection due to invalid data')
-    print('connections = ', connections)
+    print('new_connection_added = ', connections)
     
     
 async def get_connection(user_id):

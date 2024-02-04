@@ -5,7 +5,7 @@ from app.config.database import db_dependency
 from app.response.user import UserSettingsSchema
 from app.schemas.users import RecommendationRequest
 from app.services.profile import get_user_details
-from app.services.users import add_to_blacklist, add_to_interested, get_recommendations, get_user_settings, update_settings
+from app.services.users import add_to_blacklist, add_to_interested, get_recommendations, get_user_matched_list, get_user_settings, update_settings
 from app.utils.crud import get_user
 
 
@@ -51,3 +51,8 @@ async def user_like(db: db_dependency, user_id: str, data: dict):
 @user_router.post('/dislike/{user_id}', status_code=200)
 async def user_dislike(db: db_dependency, user_id: str, data: dict):
     return await add_to_blacklist(db=db, user_id=user_id, disliked_id=data.get('disliked_id'))
+
+
+@user_router.get('/get_matched_list/{user_id}', status_code=200)
+async def user_matched_list(db:db_dependency, user_id:str):
+    return await get_user_matched_list(db=db, user_id=user_id)

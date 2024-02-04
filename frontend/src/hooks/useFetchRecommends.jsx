@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { batch, useSelector } from "react-redux";
 import axiosInstance from "../axios/axiosInstance";
 import { USERS_URL } from "../constants/urls";
+import { socketConnection } from "../socket/socketConfig";
 
 function useFetchRecommends() {
 
@@ -10,6 +11,7 @@ function useFetchRecommends() {
   const batchNumber = useRef(1) //Initially it will be 1, when increment it will act as desired value
   const [isLimitReached, setLimitReached] = useState(false)
   const [accountIndex, setAccountIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.logUser.user.id);
 
 
@@ -50,7 +52,8 @@ function useFetchRecommends() {
         setData(recommendations);
         setAccount(recommendations && recommendations[0]);
         setAccountIndex(1)
-
+        setLoading(true)
+        console.log('accounts at userfetchaccounts => ', recommendations)
         if (recommendations?.length < 10){
             setLimitReached(true)
         }else{
@@ -58,10 +61,13 @@ function useFetchRecommends() {
         }
       } catch (error) {
         console.error("Error fetching recommendations:", error);
+      } finally {
+        setLoading(false)
       }
     };
 
     fetchData();
+    socketConnection()
 
   },[]);
 
@@ -74,6 +80,7 @@ function useFetchRecommends() {
     setLimitReached,
     accountIndex,
     setAccountIndex,
+    loading,
     fetchMoreUsers]
 }
 

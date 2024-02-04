@@ -5,7 +5,7 @@ import { IoIosNotifications } from "react-icons/io";
 import { useSelector, useDispatch } from "react-redux";
 import { loggedOut } from "../../redux/slices/logSlice";
 import { useNavigate, Link } from "react-router-dom";
-import { socketConnection } from "../../socket/socketConfig";
+import { IMAGE_URL } from "../../constants/urls";
 
 
 function BasicNavbar({ image }) {
@@ -13,6 +13,7 @@ function BasicNavbar({ image }) {
   const navigate = useNavigate();
   const { name, id } = useSelector((state) => state?.logUser?.user);
   const notificationCount = 10;
+  const profilePicture = localStorage.getItem(`${id}profile_picture`)?localStorage.getItem(`${id}profile_picture`):null
   const signoutPrompts = [
     "Ready to sign out? Or perhaps there's another profile waiting for your attention? 💌",
     "Thinking of signing out? Explore a bit more! 💎",
@@ -26,12 +27,6 @@ function BasicNavbar({ image }) {
     dispatch(loggedOut());
     navigate("/");
   };
-
-  useEffect(()=>{
-    if (id) {
-      socketConnection()
-    }
-  }, [id])
 
   return (
     <>
@@ -83,9 +78,10 @@ function BasicNavbar({ image }) {
                 <div className="dropdown ">
                   <label className="btn flex bg-white px-0 " tabIndex="0">
                     <img
-                      src={image ? image : avatar}
+                      src={profilePicture ? `${IMAGE_URL}${profilePicture}` : avatar}
                       alt="avatar"
                       style={{ height: "100%" }}
+                      className="rounded-full"
                     />
                     <span className="ml-2 text-sm ">{name}</span>
                   </label>

@@ -34,7 +34,7 @@ function UserProfile() {
   const [tempPrompt, setTempPrompt] = useState("");
   const [isPromptEdit, setIsPromptEdit] = useState(false);
   const [editingPromptId, setEditingPromptId] = useState(null);
-  console.log('profile_picture', profile_picture)
+
 
   const updateAvatar = (image) => {
     setProfilePicture(image);
@@ -75,7 +75,6 @@ function UserProfile() {
         const newImagesLink = [...imagesLink];
 
         if (index !== undefined && index !== null) {
-          console.log("index is getting");
           newImages[index].image = file;
           newImagesLink[index] = reader.result;
         } else {
@@ -224,6 +223,11 @@ function UserProfile() {
         setData(res.data);
         setPrompts(res.data.prompts);
         setImages(res.data.gallery);
+
+        if (res?.data?.user?.profile_picture) {
+          localStorage.setItem(`${user_id}profile_picture`, res?.data?.user?.profile_picture)
+        }
+
         console.log(res, "SUCCESS");
       })
       .catch((err) => {

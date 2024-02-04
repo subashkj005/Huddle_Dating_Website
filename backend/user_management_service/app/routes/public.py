@@ -74,9 +74,6 @@ async def otp_confimation(data: OTPRequest, db: db_dependency):
     # Key for getting user details
     user_key = f"temp_user:{data.email}"
 
-    print('\n data ==>', data)
-    print('data.email ==>', data.email)
-
     redis = RedisController()
     result = redis.get_hash_data(user_key)
 
@@ -134,9 +131,9 @@ async def user_login(data: UserLoginRequest, db: db_dependency):
 
 @guest_router.get('/add_users/{count}')
 async def add_fake_users(db: db_dependency, count: str):
-    # users = store_fake_data(db, int(count))
-    # return users
-    await match_found('88526893-0a4d-4259-8168-29e219507cda', {'match_found':'sample data ============='})
+    users = store_fake_data(db, int(count))
+    return users
+
 
 
 @guest_router.post('/add_image')

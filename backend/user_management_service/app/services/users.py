@@ -5,9 +5,12 @@ from fastapi import BackgroundTasks
 from fastapi.responses import JSONResponse, StreamingResponse
 from app.models.models import BlacklistUsers, Matchings, User, UserInterestSettings, UserInterestedAccounts, Visit
 from app.response.user import ImageSchema, InterestSchema, PromptsSchema, UserSchema, UserSettingsSchema
+from app.serializers.serializer import UserMatchedList
 from app.utils.crud import get_user, get_user_data, get_user_interests, get_user_prompts
 from app.logger.config import logger
-from sqlalchemy import not_
+from sqlalchemy import desc, not_, or_
+from socket_config.crud import connections
+from socket_config.socket import match_found
 
 
 def update_settings(db, user_id, data):
@@ -88,20 +91,20 @@ def get_recommendations(db, user_id='0d92defe-575e-4d2a-aed6-db53fcebbeaa', batc
         return JSONResponse(content={'message': "User has no settings"})
     # accounts = db.query(User).filter(~db.query(Visit).filter(Visit.visitor_id==user_id).exists(), User.age>=user.visits.min_age or User.age<=user.visits.max_age, User.gender==user.visits.gender).all()
 
-    accounts = (db.query(User)
-                .join(User.settings)
-                .filter(
-                    ~db.query(Visit)
-                    .filter(Visit.visitor_id == user_id).exists(),
-                    User.age >= user.settings.min_age,
-                    User.age <= user.settings.max_age,
-                    User.gender == user.settings.gender
-                )
-                .offset(offset).limit(batch_size).all()
-    )
+    # accounts = (db.query(User)
+    #             .join(User.settings)
+    #             .filter(
+    #                 ~db.query(Visit)
+    #                 .filter(Visit.visitor_id == user_id).exists(),
+    #                 User.age >= user.settings.min_age,
+    #                 User.age <= user.settings.max_age,
+    #                 User.gender == user.settings.gender
+    #             )
+    #             .offset(offset).limit(batch_size).all()
+    # )
 
-    # accounts = db.query(User).filter(not_(User.id == user_id)
-    #                                  ).offset(offset).limit(batch_size).all()
+    accounts = db.query(User).filter(not_(User.id == user_id)
+                                     ).order_by(desc(User.created_at)).offset(offset).limit(batch_size).all()
 
     return serialize_users(accounts)
 
@@ -128,10 +131,35 @@ async def add_to_visited(db, visitor_id, visited_id):
         return JSONResponse(content={'error': f"Exception at adding visit: {e}"}, status_code=400)
 
 
+async def send_match_notification(liked):
+    print('sending notification ......')
+    liker = liked.user
+    liked_user = liked.liked_by_user
+
+    data_for_liker = {
+        "name": liked_user.name if liked_user.name else None,
+        "age": liked_user.age if liked_user.age else None,
+        "profile_picture": liked_user.profile_picture if liked_user.profile_picture else None
+    }
+
+    data_for_liked_user = {
+        "name": liker.name if liker.name else None,
+        "age": liker.age if liker.age else None,
+        "profile_picture": liker.profile_picture if liker.profile_picture else None
+    }
+
+    print('connections before sending notification => ', connections)
+    await match_found(user_id=liker.id, match=data_for_liker)
+    await match_found(user_id=liked_user.id, match=data_for_liked_user)
+
+    return
+
+
 async def has_liked_back(db, liker_id, liked_id):
     try:
         liked = db.query(UserInterestedAccounts).filter_by(
             liker_id=liked_id, liked_by=liker_id).first()
+
         if not liked:
             return False
 
@@ -140,10 +168,11 @@ async def has_liked_back(db, liker_id, liked_id):
         db.add(new_match)
         db.commit()
 
+        asyncio.create_task(send_match_notification(liked=liked))
         return True
 
     except Exception as e:
-        logger.error(f"Exception at has like: {e}")
+        logger.error(f"Exception at match checking: {e}")
 
 
 async def add_to_interested(db, user_id, liked_id):
@@ -166,8 +195,9 @@ async def add_to_interested(db, user_id, liked_id):
             id=str(uuid.uuid4()), liker_id=user_id, liked_by=liked_id)
         db.add(new_interest)
         db.commit()
-        
-        match_check = asyncio.create_task(has_liked_back(db=db, liker_id=user_id, liked_id=liked_id))
+
+        match_check = asyncio.create_task(has_liked_back(
+            db=db, liker_id=user_id, liked_id=liked_id))
         print('match_check = ', match_check)
 
         task = asyncio.create_task(add_to_visited(
@@ -210,3 +240,42 @@ async def add_to_blacklist(db, user_id, disliked_id):
     except Exception as e:
         logger.error(f"Exception when adding dislike : {e}")
         return JSONResponse(content={'error': f"Exception: {e}"}, status_code=400)
+
+
+async def get_user_matched_list(db, user_id, is_seen=False):
+    # Query which filter the matches of the user as from both user and matched_user sides
+    bi_side_matches = db.query(Matchings).filter(
+        or_(
+            Matchings.user_id == user_id,
+            Matchings.matched_user_id == user_id
+        ),
+        Matchings.is_seen == False,
+        Matchings.expired == False
+    ).all()
+
+    partner_accounts = []
+
+    # Finding the accounts of partners
+    for match in bi_side_matches:
+        if user_id == match.user_id:
+            partner = match.matched_user
+            obj = {
+                'id': partner.id,
+                'name': partner.name if partner.name else None,
+                'profile_picture': partner.profile_picture if partner.profile_picture else None,
+                'age': partner.age if partner.age else None,
+                'expires_at': match.expiry
+            }
+            partner_accounts.append(obj)
+        else:
+            partner = match.user
+            obj = {
+                'id': partner.id,
+                'name': partner.name if partner.name else None,
+                'profile_picture': partner.profile_picture if partner.profile_picture else None,
+                'age': partner.age if partner.age else None,
+                'expires_at': match.expiry
+            }
+            partner_accounts.append(obj)
+
+    return partner_accounts

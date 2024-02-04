@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import matched_png from "../../assets/images/match text.png";
-
-import { USER_SOCKET } from "../../constants/urls";
+import avatar from '../../assets/images/avatar.jpg'
+import { IMAGE_URL, USER_SOCKET } from "../../constants/urls";
 import { customConfetti } from "../../utils/confetti/customConfetti";
 import { useSelector } from "react-redux";
 import { socket } from "../../socket/socketConfig";
@@ -11,6 +11,8 @@ function MatchedModal() {
   const userId = useSelector((state) => state.logUser.user.id);
   const [modalOpen, setModalOpen] = useState(false);
   const [user, setUser] = useState(false);
+  console.log('Matched User:', user);
+
 
   const openModal = () => {
     setModalOpen(true);
@@ -33,6 +35,7 @@ function MatchedModal() {
     socket.on('match_found', (data) => {
       
       console.log('Match found:', data);
+      setUser(data.match)
       openModal()
       
     });
@@ -44,11 +47,6 @@ function MatchedModal() {
       className="relative 
     "
     >
-      {/* Trigger Button */}
-      <button onClick={openModal} className="bg-blue-500 text-white px-4 py-2">
-        Open Modal
-      </button>
-
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center transition-opacity ease-in-out duration-300">
@@ -66,7 +64,7 @@ function MatchedModal() {
                 <div className="p-2 rounded-lg flex items-center transition duration-300 ease-in-out bg-gradient-to-r from-pink-200 to-sky-100">
                   <div className="relative inline-block rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-[0.2rem]">
                     <img
-                      src="https://i.pravatar.cc/150?u=a04258114e29026708c"
+                      src={user?.profile_picture ? `${IMAGE_URL}${user?.profile_picture}` : avatar }
                       className="max-w-[3rem] max-h-[3rem] rounded-full border-2 border-white object-cover "
                     />
                   </div>
@@ -74,7 +72,7 @@ function MatchedModal() {
                     <div className="ml-6">
                       <div className="mb-1">
                         <h3 className="text-lg font-medium font-sans">
-                          Name, 23yrs
+                          {user?.name}, {user?.age ? `${user?.age} yrs` : ""}
                         </h3>
                       </div>
                     </div>

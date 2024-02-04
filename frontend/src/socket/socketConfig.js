@@ -14,5 +14,7 @@ export async function socketConnection() {
     socket.on("connect", async () => {
       socket.emit("add_user_connection", { 'user_id':userId });
     });
+
+    console.log('Socket connetion sent to backend')
   }
 }

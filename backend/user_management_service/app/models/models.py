@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import func
 from app.models.enums import EducationalLevel, Gender, InterestedIn
 from app.models.interests_enums import *
@@ -66,15 +67,16 @@ class User(Base):
 @event.listens_for(User.date_of_birth, 'set')
 def update_age(target, value, oldvalue, mapper):
     if value is not None:
-        
-        # date_of_birth = datetime.strptime(value, "%Y-%m-%d").date()
-        # today = datetime.now().date()
-        # age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
-        # target.age = age
-           
+# for real data 
+        date_of_birth = datetime.strptime(value, "%Y-%m-%d").date()
         today = datetime.now().date()
-        age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
         target.age = age
+
+# for fake data    
+        # today = datetime.now().date()
+        # age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        # target.age = age
         
 
 
@@ -163,9 +165,15 @@ class UserInterestedAccounts(Base):
     liked_by = Column(String(36), ForeignKey('users.id'), key='likes_id', nullable=False)
     liked_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    user = relationship("User", 
-                        foreign_keys="[UserInterestedAccounts.liker_id, UserInterestedAccounts.liked_by]", 
-                        primaryjoin="User.id == UserInterestedAccounts.liker_id", backref='interested_accounts')
+    user = relationship("User",
+                        primaryjoin="User.id == UserInterestedAccounts.liker_id",
+                        backref="interested_accounts_as_liker",
+                        )
+
+    liked_by_user = relationship("User",
+                                 primaryjoin="User.id == UserInterestedAccounts.liked_by",
+                                 backref="interested_accounts_as_liked_by",
+                                 )
     
     
 class BlacklistUsers(Base):
@@ -189,11 +197,24 @@ class Matchings(Base):
         uuid.uuid4()), unique=True, nullable=False)
     user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
     matched_user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    is_seen = Column(Boolean, default=False)
+    expired = Column(Boolean, default=False)
+    expiry = Column(DateTime, default=lambda: datetime.now() + timedelta(days=2))
+    
     
     user = relationship("User",
-                        foreign_keys="[Matchings.user_id, Matchings.matched_user_id]", 
                         primaryjoin="User.id == Matchings.user_id",
-                        backref='matchings')
+                        backref='matchings') 
+    
+    matched_user = relationship("User",
+                        primaryjoin="User.id == Matchings.matched_user_id",
+                        backref='matched_accounts')
+    
+    @hybrid_property
+    def is_expired(self):
+        return datetime.now() >= self.expiry
+    
+  
  
  
  

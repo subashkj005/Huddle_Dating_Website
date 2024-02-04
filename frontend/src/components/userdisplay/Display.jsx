@@ -33,11 +33,13 @@ function Display() {
     setLimitReached,
     accountIndex,
     setAccountIndex,
+    loading,
     fetchMoreUsers,
   ] = useFetchRecommends();
   const [handleLike, handleDislike] = useInterest();
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
+  console.log("loading boolean => ",  loading);
 
   let counter = 0; // Counter for slider
   let lastScrollTime = 0; // Carousel scrolltime
@@ -74,7 +76,6 @@ function Display() {
 
       console.log("account = ", account?.user_id, account?.name);
     } else if (movement == "backward" && accountIndex >= 0) {
-      
       if (accountIndex === 0) {
         hottoast("Reached end", {
           icon: "❗️",
@@ -88,8 +89,8 @@ function Display() {
         setAnimation(false);
       }, 1000);
 
-      setAccount(data[accountIndex-1]);
-      console.log('a/c index bwd =', accountIndex)
+      setAccount(data[accountIndex - 1]);
+      console.log("a/c index bwd =", accountIndex);
     }
     handleSlidePosition();
   };
@@ -173,7 +174,9 @@ function Display() {
               className="heart"
               src={heart}
               alt=""
-              onClick={() => handleSlideChange("forward", account?.user_id, null)}
+              onClick={() =>
+                handleSlideChange("forward", account?.user_id, null)
+              }
             />
           </div>
         </div>
