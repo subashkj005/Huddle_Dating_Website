@@ -1,17 +1,12 @@
-import React from 'react'
-import BasicNavbar from '../../../components/navbar/BasicNavbar'
-import Sidebar from '../../../components/matchingSidebar/Sidebar'
-
+import React from "react";
+import Display from '../../../components/userdisplay/Display'
 
 function UserHome() {
   return (
     <>
-    <BasicNavbar/>
-    <Sidebar/>
-
-    
+      <Display />
     </>
-  )
+  );
 }
 
-export default UserHome
+export default UserHome;

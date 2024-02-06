@@ -18,12 +18,13 @@ import NewFile from "./pages/user/Profile/NewFile";
 import InitialAuth from "./utils/route_auth/InitialAuth";
 import UserAuthRoute from "./utils/route_auth/UserAuthRoute";
 import AdminAuthRoute from "./utils/route_auth/AdminAuthRoute";
+import Layout from "./components/commonContent/Layout";
 
 function App() {
   return (
     <LoadingProvider>
       <HashLoadingScreen />
-      
+
       <div className="App">
         <ToastContainer hideProgressBar={true} autoClose={3000} />
         <Toaster position="bottom-center" reverseOrder={false} />
@@ -43,9 +44,11 @@ function App() {
             </Route>
             {/* User Routes */}
             <Route path="user" element={<UserAuthRoute />}>
-              <Route index element={<UserHome />} />
+              <Route element={<Layout />}>
+                <Route index element={<UserHome />} />
+                <Route path="image" element={<NewFile />} />
+              </Route>
               <Route path="profile" element={<UserProfile />} />
-              <Route path="image" element={<NewFile />} />
             </Route>
             {/* Admin */}
             <Route path="admin" element={<AdminAuthRoute />}>
