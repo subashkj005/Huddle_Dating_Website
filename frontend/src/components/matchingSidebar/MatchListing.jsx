@@ -6,15 +6,40 @@ import { useSelector } from "react-redux";
 import avatar from "../../assets/images/avatar.jpg";
 import matchlistbg from "../../assets/images/matches_list_bg.png";
 
-function MatchListing() {
+function MatchListing({ setModalOpen, setUser }) {
   const userId = useSelector((state) => state.logUser.user.id);
   const [matches, setMatches] = useState([]);
+  const [unseenMatchesSet, setUnSeenMatchesSet] = useState(false)
+
+  const showUnseenMatches = (matches) => {
+    let unSeenMatches = [];
+    let seenMatches = [];
+  
+    for (const match of matches) {
+      if (match.is_seen === true) {
+        seenMatches.push(match);
+      } else {
+        unSeenMatches.push(match);
+      }
+    }
+
+    setMatches(seenMatches);
+  
+    if (!unseenMatchesSet && unSeenMatches.length > 0) {
+      setTimeout(() => {
+        setUser(unSeenMatches);
+        setModalOpen(true);
+        setMatches((prevMatches) => [...prevMatches, ...unSeenMatches]);
+        setUnSeenMatchesSet(true) // It is setting for not rendering it for twice
+      }, 2000);
+    }
+  };
 
   useEffect(() => {
     axiosInstance
       .get(`${USERS_URL}/get_matched_list/${userId}`)
       .then((res) => {
-        setMatches(res.data);
+        showUnseenMatches(res.data);
       })
       .catch((err) => {
         console.log("ERR at machilist", err);
@@ -30,7 +55,7 @@ function MatchListing() {
         {matches?.length !== 0 ? (
           matches.map((match, idx) => (
             <div className="p-2" key={idx}>
-              <div className="p-2 rounded-lg flex items-center transition duration-300 ease-in-out bg-gradient-to-r from-pink-200 to-sky-100">
+              <div className="p-2 rounded-lg flex items-center transition duration-150 ease-in-out bg-gradient-to-r from-pink-200 to-sky-100 hover:text-3xl hover:scale-95">
                 <div className="relative inline-block rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-[0.2rem]">
                   <img
                     src={

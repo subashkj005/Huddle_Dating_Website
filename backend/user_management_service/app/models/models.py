@@ -62,22 +62,22 @@ class User(Base):
     visits = relationship("Visit", back_populates='user', cascade="all, delete-orphan",
                           foreign_keys="[Visit.visitor_id, Visit.visited_id]",
                           primaryjoin="User.id == Visit.visitor_id")
-    
-    
+
+
 @event.listens_for(User.date_of_birth, 'set')
 def update_age(target, value, oldvalue, mapper):
     if value is not None:
-# for real data 
+        # for real data
         date_of_birth = datetime.strptime(value, "%Y-%m-%d").date()
         today = datetime.now().date()
-        age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+        age = today.year - date_of_birth.year - \
+            ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
         target.age = age
 
-# for fake data    
+# for fake data
         # today = datetime.now().date()
         # age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
         # target.age = age
-        
 
 
 class Prompt(Base):
@@ -127,44 +127,46 @@ class UserGallery(Base):
 
     user_id = Column(String(36), ForeignKey('users.id'))
     user = relationship("User", back_populates="gallery")
-    
+
 
 class UserInterestSettings(Base):
     __tablename__ = 'user_settings'
-    
+
     id = Column(String(36), primary_key=True, default=str(
-        uuid.uuid4()), unique=True, nullable=False) 
+        uuid.uuid4()), unique=True, nullable=False)
     max_age = Column(Integer, default=30)
     min_age = Column(Integer, default=18)
     distance = Column(Integer, default=10)
     gender = Column(Enum(Gender), nullable=True)
-    
+
     user_id = Column(String(36), ForeignKey('users.id'))
     user = relationship("User", back_populates="settings", single_parent=True)
-    
-    
+
+
 class Visit(Base):
     __tablename__ = 'visits'
-    
+
     id = Column(String(36), primary_key=True, default=str(
         uuid.uuid4()), unique=True, nullable=False)
     visitor_id = Column(String(36), ForeignKey('users.id'), key='visitor_id')
     visited_id = Column(String(36), ForeignKey('users.id'), key='visited_id')
     visited_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     user = relationship("User", back_populates='visits', foreign_keys="[Visit.visitor_id, Visit.visited_id]",
-                       primaryjoin="User.id == Visit.visitor_id")
-    
-    
+                        primaryjoin="User.id == Visit.visitor_id")
+
+
 class UserInterestedAccounts(Base):
     __tablename__ = 'interested_accounts'
-    
+
     id = Column(String(36), primary_key=True, default=str(
         uuid.uuid4()), unique=True, nullable=False)
-    liker_id = Column(String(36), ForeignKey('users.id'), key='liker_id', nullable=False)
-    liked_by = Column(String(36), ForeignKey('users.id'), key='likes_id', nullable=False)
+    liker_id = Column(String(36), ForeignKey('users.id'),
+                      key='liker_id', nullable=False)
+    liked_by = Column(String(36), ForeignKey('users.id'),
+                      key='likes_id', nullable=False)
     liked_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     user = relationship("User",
                         primaryjoin="User.id == UserInterestedAccounts.liker_id",
                         backref="interested_accounts_as_liker",
@@ -174,47 +176,47 @@ class UserInterestedAccounts(Base):
                                  primaryjoin="User.id == UserInterestedAccounts.liked_by",
                                  backref="interested_accounts_as_liked_by",
                                  )
-    
-    
+
+
 class BlacklistUsers(Base):
     __tablename__ = 'blacklists'
-    
+
     id = Column(String(36), primary_key=True, default=str(
         uuid.uuid4()), unique=True, nullable=False)
     user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
     disliked_id = Column(String(36), ForeignKey('users.id'), nullable=False)
-    
+
     user = relationship("User",
-                        foreign_keys="[BlacklistUsers.user_id, BlacklistUsers.disliked_id]", 
+                        foreign_keys="[BlacklistUsers.user_id, BlacklistUsers.disliked_id]",
                         primaryjoin="User.id == BlacklistUsers.user_id",
                         backref='blacklists')
-    
-    
+
+
 class Matchings(Base):
     __tablename__ = 'matchings'
-    
+
     id = Column(String(36), primary_key=True, default=str(
         uuid.uuid4()), unique=True, nullable=False)
     user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
-    matched_user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    matched_user_id = Column(
+        String(36), ForeignKey('users.id'), nullable=False)
     is_seen = Column(Boolean, default=False)
     expired = Column(Boolean, default=False)
-    expiry = Column(DateTime, default=lambda: datetime.now() + timedelta(days=2))
-    
-    
+    expiry = Column(
+        DateTime, default=lambda: datetime.now() + timedelta(days=2))
+
     user = relationship("User",
                         primaryjoin="User.id == Matchings.user_id",
-                        backref='matchings') 
-    
+                        backref='matchings')
+
     matched_user = relationship("User",
-                        primaryjoin="User.id == Matchings.matched_user_id",
-                        backref='matched_accounts')
-    
+                                primaryjoin="User.id == Matchings.matched_user_id",
+                                backref='matched_accounts')
+
     @hybrid_property
     def is_expired(self):
         return datetime.now() >= self.expiry
-    
-  
- 
- 
- 
+
+    @hybrid_property
+    def chatroom_name(self):
+        return "".join(sorted([self.user_id, self.matched_user_id]))

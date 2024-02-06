@@ -5,8 +5,10 @@ from app.config.database import db_dependency
 from app.response.user import UserSettingsSchema
 from app.schemas.users import RecommendationRequest
 from app.services.profile import get_user_details
-from app.services.users import add_to_blacklist, add_to_interested, get_recommendations, get_user_matched_list, get_user_settings, update_settings
 from app.utils.crud import get_user
+from app.services.users import add_test_matchList, add_to_blacklist, add_to_interested, \
+                            get_recommendations, get_user_matched_list, get_user_settings, \
+                                update_match_accounts_seen, update_settings
 
 
 user_router = APIRouter(
@@ -56,3 +58,15 @@ async def user_dislike(db: db_dependency, user_id: str, data: dict):
 @user_router.get('/get_matched_list/{user_id}', status_code=200)
 async def user_matched_list(db:db_dependency, user_id:str):
     return await get_user_matched_list(db=db, user_id=user_id)
+
+
+@user_router.post('/update_seen', status_code=200)
+async def update_seen_matches(db:db_dependency, data: dict):
+    return await update_match_accounts_seen(db=db, data=data)
+
+
+
+# test case
+@user_router.post('/add_test_match')
+async def add_test_match(db: db_dependency, data: dict ):
+    return await add_test_matchList(db=db, data=data)

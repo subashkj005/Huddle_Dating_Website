@@ -39,7 +39,6 @@ function Display() {
   const [handleLike, handleDislike] = useInterest();
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
-  console.log("loading boolean => ",  loading);
 
   let counter = 0; // Counter for slider
   let lastScrollTime = 0; // Carousel scrolltime

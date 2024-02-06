@@ -8,7 +8,8 @@ from app.response.user import ImageSchema, InterestSchema, PromptsSchema, UserSc
 from app.serializers.serializer import UserMatchedList
 from app.utils.crud import get_user, get_user_data, get_user_interests, get_user_prompts
 from app.logger.config import logger
-from sqlalchemy import desc, not_, or_
+from sqlalchemy import desc, not_, or_, update
+from sqlalchemy.exc import SQLAlchemyError
 from socket_config.crud import connections
 from socket_config.socket import match_found
 
@@ -210,6 +211,23 @@ async def add_to_interested(db, user_id, liked_id):
         logger.error(f"Exception: {e}")
         return JSONResponse(content={'error': f"Exception when adding like : {e}"}, status_code=400)
 
+# test case
+
+
+async def add_test_matchList(db, data):
+    try:
+        liker_id = data.get('liker_id', None)
+        liked_id = data.get('liked_id', None)
+
+        new_match = Matchings(id=str(uuid.uuid4()),
+                              user_id=liker_id, matched_user_id=liked_id)
+        db.add(new_match)
+        db.commit()
+        return JSONResponse({'message': 'success'}, status_code=200)
+    except Exception as e:
+        print(e)
+        return JSONResponse({'message': 'success'}, status_code=400)
+
 
 async def add_to_blacklist(db, user_id, disliked_id):
     try:
@@ -239,43 +257,61 @@ async def add_to_blacklist(db, user_id, disliked_id):
 
     except Exception as e:
         logger.error(f"Exception when adding dislike : {e}")
-        return JSONResponse(content={'error': f"Exception: {e}"}, status_code=400)
+        return JSONResponse(content={'error': f"Exception: {e}"}, status_code=500)
 
 
 async def get_user_matched_list(db, user_id, is_seen=False):
     # Query which filter the matches of the user as from both user and matched_user sides
-    bi_side_matches = db.query(Matchings).filter(
-        or_(
-            Matchings.user_id == user_id,
-            Matchings.matched_user_id == user_id
-        ),
-        Matchings.is_seen == False,
-        Matchings.expired == False
-    ).all()
+    try:
+        bi_side_matches = db.query(Matchings).filter(
+            or_(
+                Matchings.user_id == user_id,
+                Matchings.matched_user_id == user_id
+            ),
+            Matchings.expired == False
+        ).all()
+    except SQLAlchemyError as e:
+        print(f"Exception at filtering matches : {e}")
+        return JSONResponse(content={'error': e}, status_code=500)
 
     partner_accounts = []
 
-    # Finding the accounts of partners
-    for match in bi_side_matches:
-        if user_id == match.user_id:
-            partner = match.matched_user
+    try:
+        # Finding the accounts of partners
+        for match in bi_side_matches:
+            if user_id == match.user_id:
+                partner = match.matched_user
+            else:
+                partner = match.user
+
             obj = {
-                'id': partner.id,
+                'id': match.id,
                 'name': partner.name if partner.name else None,
                 'profile_picture': partner.profile_picture if partner.profile_picture else None,
                 'age': partner.age if partner.age else None,
-                'expires_at': match.expiry
+                'is_seen':match.is_seen,
+                'expires_at': match.expiry,
+                'chatroom_name': match.chatroom_name
             }
             partner_accounts.append(obj)
-        else:
-            partner = match.user
-            obj = {
-                'id': partner.id,
-                'name': partner.name if partner.name else None,
-                'profile_picture': partner.profile_picture if partner.profile_picture else None,
-                'age': partner.age if partner.age else None,
-                'expires_at': match.expiry
-            }
-            partner_accounts.append(obj)
+    except Exception as e:
+        print(f"Exception at creating matches  : {e}")
+        return JSONResponse(content={'error': e}, status_code=500)
 
     return partner_accounts
+
+
+async def update_match_accounts_seen(db, data):
+    match_ids = data.get('match_ids', None)
+    if not match_ids:
+        return JSONResponse(content={'error': "Invalid data"}, status_code=400)
+
+    try:
+        update_query = update(Matchings).where(Matchings.id.in_(match_ids)).values(is_seen=True)
+        db.execute(update_query)
+        db.commit()
+        return JSONResponse(content={'message': 'Updated match seen..'}, status_code=200)
+    
+    except SQLAlchemyError as e:
+        logger.error(f"Exception at updating match seen : ", {e})
+        return JSONResponse(content={'error': e}, status_code=500)

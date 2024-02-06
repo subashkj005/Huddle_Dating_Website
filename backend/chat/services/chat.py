@@ -1,4 +1,5 @@
 from flask import jsonify
+from datetime import datetime
 from serializers.serializer import MessageSerializer
 from models.models import Room, Message
 
@@ -70,3 +71,22 @@ def get_chatroom_messages(chatroom_name):
     except Exception as e:
         print(f"Exception at getting messages: {e}")
         return jsonify({'error': "Error when adding message"}), 400
+    
+    
+def get_account_details(chat_partners):
+    pass
+    
+    
+    
+def get_all_chats(user_id):
+    chatsrooms = Room.objects.filter(participants__in=[user_id], expiry__gt=datetime.now())
+    all_partcipants = []
+    for room in chatsrooms:
+        all_partcipants.extend(list(room.participants))
+    chat_partners = set(all_partcipants)
+    chat_partners.discard(user_id)
+    
+    # get_account_details(chat_partners)
+        
+    print('chat_partners discard == ', chat_partners)
+    return 'Success'
