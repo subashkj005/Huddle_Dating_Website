@@ -11,6 +11,7 @@ public_services = {
 protected_services = {
     "users": "http://localhost:7614/",
     "admin": "http://localhost:7614/",
+    "chat": "http://localhost:5236/",
 }
 
 

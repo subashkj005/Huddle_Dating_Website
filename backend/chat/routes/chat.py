@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from mongoengine import Q
-from services.chat import create_chat_room, add_message_to_room, get_chatroom_messages,\
-                        get_all_chats
+from services.chat import create_chat_room, add_message_to_room, get_chatroom_messages
+
 
 chat_route = Blueprint('routes', __name__)
 
@@ -26,7 +26,3 @@ def get_messages(chatroom_name):
     return get_chatroom_messages(chatroom_name)
 
 
-@chat_route.get('/get_all_chats/<string:user_id>')
-def get_chats_of_user(user_id):
-    return get_all_chats(user_id)
-    

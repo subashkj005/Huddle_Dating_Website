@@ -399,7 +399,7 @@ function UserProfile() {
                   />
                   <div className="flex justify-between items-center">
                     <label
-                      for="accordion-1"
+                      htmlFor="accordion-1"
                       className="accordion-title text-base font-normal ml-2"
                     >
                       Interests
@@ -663,7 +663,7 @@ function UserProfile() {
                   />
                   <div className="flex justify-between items-center">
                     <label
-                      for="accordion-2"
+                      htmlFor="accordion-2"
                       className="accordion-title text-base font-normal ml-2"
                     >
                       Work

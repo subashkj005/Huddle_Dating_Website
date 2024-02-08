@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
+import requests
 import uuid
+from app.config.settings import get_settings
 from fastapi import BackgroundTasks
 from fastapi.responses import JSONResponse, StreamingResponse
 from app.models.models import BlacklistUsers, Matchings, User, UserInterestSettings, UserInterestedAccounts, Visit
@@ -12,6 +14,8 @@ from sqlalchemy import desc, not_, or_, update
 from sqlalchemy.exc import SQLAlchemyError
 from socket_config.crud import connections
 from socket_config.socket import match_found
+
+settings = get_settings()
 
 
 def update_settings(db, user_id, data):
@@ -156,6 +160,22 @@ async def send_match_notification(liked):
     return
 
 
+async def create_chat_room( liker_id, liked_id):
+    data = {
+        'user1': liker_id,
+        'user2': liked_id
+    }
+    response = requests.post(f'{settings.CHAT_SERVICE}/create_room', json=data, headers={'Content-Type': 'application/json'})
+    content = response.content.decode('utf-8')
+    
+    if response.status_code == 200:
+        logger.info('Created chat room successfully')
+    else:
+        logger.error(f'Chatroom creation failed : {content}')
+    return
+    
+
+
 async def has_liked_back(db, liker_id, liked_id):
     try:
         liked = db.query(UserInterestedAccounts).filter_by(
@@ -170,6 +190,7 @@ async def has_liked_back(db, liker_id, liked_id):
         db.commit()
 
         asyncio.create_task(send_match_notification(liked=liked))
+        asyncio.create_task(create_chat_room(liker_id, liked_id))
         return True
 
     except Exception as e:
@@ -308,6 +329,7 @@ async def update_match_accounts_seen(db, data):
 
     try:
         update_query = update(Matchings).where(Matchings.id.in_(match_ids)).values(is_seen=True)
+
         db.execute(update_query)
         db.commit()
         return JSONResponse(content={'message': 'Updated match seen..'}, status_code=200)

@@ -19,7 +19,7 @@ class Room(Document):
 
 
 class Message(Document):
-    sender = StringField(required=True)
+    sender_id = StringField(required=True)
     chatroom = ReferenceField(Room, required=True)
     content = StringField(required=True)
     sent_at = DateTimeField(default=datetime.utcnow)

@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # Email 
     EMAIL_ADDRESS: str = os.environ.get("EMAIL_ADDRESS", "email_address")
     EMAIL_PASSWORD: str = os.environ.get("EMAIL_PASSWORD", "email_password")
+    
+    # Services
+    CHAT_SERVICE: str = os.environ.get('CHAT_SERVICE')
 
 
 @lru_cache()

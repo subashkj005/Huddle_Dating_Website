@@ -90,7 +90,7 @@ function SignupPage() {
               <div className="center-box">
                 <div className="outer">
                   <div className="input-box">
-                    <label for="email">Email Address</label>
+                    <label htmlFor="email">Email Address</label>
                     <input
                       type="email"
                       name="email"
@@ -99,7 +99,7 @@ function SignupPage() {
                     />
                   </div>
                   <div className="input-box">
-                    <label for="password">Password</label>
+                    <label htmlFor="password">Password</label>
                     <input
                       type="password"
                       name="password"
@@ -108,7 +108,7 @@ function SignupPage() {
                     />
                   </div>
                   <div className="input-box">
-                    <label for="password">Confirm Password</label>
+                    <label htmlFor="password">Confirm Password</label>
                     <input
                       type="password"
                       name="confirm_password"

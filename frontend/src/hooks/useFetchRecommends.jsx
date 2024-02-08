@@ -4,6 +4,7 @@ import axiosInstance from "../axios/axiosInstance";
 import { USERS_URL } from "../constants/urls";
 import { socketConnection } from "../socket/socketConfig";
 
+
 function useFetchRecommends() {
 
   const [data, setData] = useState([]);
@@ -44,7 +45,8 @@ function useFetchRecommends() {
   };
 
   useEffect(() => {
-
+    socketConnection()
+    
     const fetchData = async () => {
       try {
         const recommendations = await getRecommendations();
@@ -53,7 +55,7 @@ function useFetchRecommends() {
         setAccount(recommendations && recommendations[0]);
         setAccountIndex(1)
         setLoading(true)
-        console.log('accounts at userfetchaccounts => ', recommendations)
+  
         if (recommendations?.length < 10){
             setLimitReached(true)
         }else{
@@ -67,7 +69,8 @@ function useFetchRecommends() {
     };
 
     fetchData();
-    socketConnection()
+    
+    
 
   },[]);
 

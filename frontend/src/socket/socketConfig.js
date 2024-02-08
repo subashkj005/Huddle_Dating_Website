@@ -8,7 +8,6 @@ const userId = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user")).id
   : null;
 
-console.log('userid = ', userId)
 export async function socketConnection() {
   if (userId) {
     socket.on("connect", async () => {
@@ -16,5 +15,6 @@ export async function socketConnection() {
     });
 
     console.log('Socket connetion sent to backend')
+
   }
 }

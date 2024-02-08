@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import logo from "../../assets/images/logo_png_hd-cropped.png";
 import avatar from "../../assets/images/avatar.jpg";
 import { IoIosNotifications } from "react-icons/io";

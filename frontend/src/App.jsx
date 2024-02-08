@@ -19,6 +19,7 @@ import InitialAuth from "./utils/route_auth/InitialAuth";
 import UserAuthRoute from "./utils/route_auth/UserAuthRoute";
 import AdminAuthRoute from "./utils/route_auth/AdminAuthRoute";
 import Layout from "./components/commonContent/Layout";
+import Chat from "./pages/user/ChatPage/Chat";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             <Route path="user" element={<UserAuthRoute />}>
               <Route element={<Layout />}>
                 <Route index element={<UserHome />} />
+                <Route path="chat/:chatName" element={<Chat />} />
                 <Route path="image" element={<NewFile />} />
               </Route>
               <Route path="profile" element={<UserProfile />} />

@@ -24,11 +24,13 @@ async def add_user_connection(sid, data):
 @sio.event
 async def match_found(user_id, match):
     socket_connection = await get_connection(user_id)
-    print('===============', socket_connection)
+
     if socket_connection:
         await sio.emit('match_found', {'match': match}, to=socket_connection)
     else:
         logger.error("User have currently have no connection")
+        
+        
         
         
         
