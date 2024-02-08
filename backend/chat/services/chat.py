@@ -60,7 +60,7 @@ def add_message_to_room(message):
                     content=content
                     )
         msg.save()
-        logger.info("Message added successfully")
+        logger.info("Message added successfully ======== 1")
         return jsonify({'message': "Message added successfully"}), 200
     
     except Exception as e:

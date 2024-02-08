@@ -45,7 +45,7 @@ const InputMessage = ({ owner, ownerAvatar, sendMessageLoading, typing, resetTyp
         onKeyDown={handleTyping}
         onKeyUp={handleTyping}
       />
-      <button type="submit" className={`chatApp__convButton ${loadingClass}`}>
+      <button type="submit"  className={`chatApp__convButton ${loadingClass}`}>
         <GrSend size={22} />
       </button>
     </form>

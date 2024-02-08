@@ -1,6 +1,7 @@
 from flask import request
 from datetime import datetime
 from flask_socketio import SocketIO, join_room, leave_room, send
+from services.chat import add_message_to_room
 from config.settings import get_settings
 from logger.config import logger
 
@@ -63,6 +64,7 @@ def handle_leave_room(data):
 def handle_send_message(data):
     message = data['message']
     room_name = message.get('chatroom')
+    add_message_to_room(message)
     if room_name:
         if room_name in rooms:
             sio.emit('recieve_message', {'message':message}, to=room_name)
@@ -70,7 +72,6 @@ def handle_send_message(data):
             
 @sio.on('is_typing')
 def handle_is_typing(data):
-    logger.info('Calling is_typing')
     owner = data['owner']
     room_name = data['room_name']
     sio.emit('set_typing', {'owner': owner}, to=room_name)
@@ -78,7 +79,6 @@ def handle_is_typing(data):
  
 @sio.on('finished_typing')
 def handle_is_typing(data):
-    logger.info('Calling finished_typing')
     owner = data['owner']
     room_name = data['room_name']
     sio.emit('reset_typing', {'owner': owner}, to=room_name)
