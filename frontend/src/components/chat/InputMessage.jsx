@@ -1,7 +1,7 @@
 import React from 'react';
 import { GrSend } from "react-icons/gr";
 
-const InputMessage = ({ owner, ownerAvatar, sendMessageLoading, typing, resetTyping, isLoading }) => {
+const InputMessage = ({ owner, ownerAvatar, sendMessageLoading, typing, resetTyping, isLoading, socket, isTyping, roomName }) => {
   const handleSendMessage = (event) => {
     event.preventDefault();
     const message = event.target.message.value.trim();
@@ -14,8 +14,18 @@ const InputMessage = ({ owner, ownerAvatar, sendMessageLoading, typing, resetTyp
   const handleTyping = (event) => {
     const message = event.target.value.trim();
     if (message) {
+
+      if (!isTyping[owner]) {
+      socket.current.emit('is_typing', {'owner': owner, 'room_name': roomName})
+      }
+
+
+
       typing(owner);
     } else {
+
+      socket.current.emit('finished_typing', {'owner': owner, 'room_name': roomName})
+
       resetTyping(owner);
     }
   };

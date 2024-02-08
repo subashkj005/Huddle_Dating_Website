@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../assets/styles/chat.css";
 import MessageList from "../../components/chat/MessageList";
 import TypingIndicator from "../../components/chat/TypingIndicator";
@@ -15,6 +15,8 @@ const ChatBox = ({
   user,
   profilePicture,
   socket,
+  isTyping,
+  setIsTyping
 }) => {
   let owner = user?.name;
   let ownerAvatar = `${IMAGE_URL}${profilePicture}` || avatar;
@@ -24,7 +26,7 @@ const ChatBox = ({
     `${IMAGE_URL}${chatDetails?.profile_picture}` || avatar;
   const recipient = chatDetails?.name;
 
-  const [isTyping, setIsTyping] = useState({});
+  
 
   const sendMessage = (sender, senderAvatar, content) => {
     setTimeout(() => {
@@ -35,7 +37,6 @@ const ChatBox = ({
         id: messages.length + 1,
       };
 
-      // setMessages([...messages, newMessageItem]);
       resetTyping(sender);
 
       socket.current.emit(
@@ -45,11 +46,14 @@ const ChatBox = ({
     }, 400);
   };
 
+
   const typing = (writer) => {
     if (!isTyping[writer]) {
       setIsTyping({ ...isTyping, [writer]: true });
+      
     }
   };
+
 
   const resetTyping = (writer) => {
     setIsTyping({ ...isTyping, [writer]: false });
@@ -84,8 +88,11 @@ const ChatBox = ({
           ownerAvatar={ownerAvatar}
           sendMessage={sendMessage}
           sendMessageLoading={sendMessageLoading}
+          socket={socket}
           typing={typing}
           resetTyping={resetTyping}
+          isTyping={isTyping}
+          roomName={chatDetails?.chatroom_name}
         />
       </div>
     </div>

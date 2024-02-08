@@ -61,12 +61,25 @@ def handle_leave_room(data):
             
 @sio.on('send_message')
 def handle_send_message(data):
-    logger.info('===============================Calling sendmessage ==============================')
     message = data['message']
-    print('message => ', message)
     room_name = message.get('chatroom')
     if room_name:
         if room_name in rooms:
-            print('sending message ...')
             sio.emit('recieve_message', {'message':message}, to=room_name)
+            
+            
+@sio.on('is_typing')
+def handle_is_typing(data):
+    logger.info('Calling is_typing')
+    owner = data['owner']
+    room_name = data['room_name']
+    sio.emit('set_typing', {'owner': owner}, to=room_name)
+
+ 
+@sio.on('finished_typing')
+def handle_is_typing(data):
+    logger.info('Calling finished_typing')
+    owner = data['owner']
+    room_name = data['room_name']
+    sio.emit('reset_typing', {'owner': owner}, to=room_name)
  
