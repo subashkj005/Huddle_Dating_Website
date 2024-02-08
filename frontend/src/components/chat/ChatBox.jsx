@@ -29,13 +29,13 @@ const ChatBox = ({
   const sendMessage = (sender, senderAvatar, content) => {
     setTimeout(() => {
       let newMessageItem = {
-        id: messages.length + 1,
         sender_id: owner_id,
         chatroom: chatName,
         content: content,
+        id: messages.length + 1,
       };
 
-      setMessages([...messages, newMessageItem]);
+      // setMessages([...messages, newMessageItem]);
       resetTyping(sender);
 
       socket.current.emit(
