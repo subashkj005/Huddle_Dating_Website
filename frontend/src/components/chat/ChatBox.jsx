@@ -6,6 +6,7 @@ import InputMessage from "../../components/chat/InputMessage";
 import { CHAT_URL, IMAGE_URL } from "../../constants/urls";
 import avatar from "../../assets/images/avatar.jpg";
 import axiosInstance from "../../axios/axiosInstance";
+import ChatHeader from "./ChatHeader";
 
 const ChatBox = ({
   messages,
@@ -19,8 +20,9 @@ const ChatBox = ({
   setIsTyping
 }) => {
   let owner = user?.name;
-  let ownerAvatar = `${IMAGE_URL}${profilePicture}` || avatar;
+  let ownerAvatar = profilePicture ? `${IMAGE_URL}${profilePicture}` : avatar;
   let owner_id = user?.id;
+  console.log('OWNER AVATAR =>', ownerAvatar)
 
   const recipientAvatar =
     `${IMAGE_URL}${chatDetails?.profile_picture}` || avatar;
@@ -72,6 +74,10 @@ const ChatBox = ({
 
   return (
     <div className="chatApp__conv">
+      <ChatHeader
+      recipient={recipient}
+       recipientAvatar={recipientAvatar} 
+       />
       <MessageList
         owner={owner}
         ownerAvatar={ownerAvatar}
