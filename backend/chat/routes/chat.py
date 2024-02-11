@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-from mongoengine import Q
 from services.chat import create_chat_room, add_message_to_room, get_chatroom_messages
 
 

@@ -10,15 +10,12 @@ load_dotenv(dotenv_path=env_path)
 
 class Settings():
 
-    APP_NAME: str = os.environ.get("APP_NAME", "ChatService")
+    APP_NAME: str = os.environ.get("APP_NAME", "PostsService")
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "secret")
-    
     FRONTEND_HOST: str = os.environ.get("FRONTEND_HOST")
     FRONTEND_HOST_ADDRESS: str = os.environ.get("FRONTEND_HOST_ADDRESS")
     
-    CHAT_SERVICE: str = os.environ.get("CHAT_SERVICE")
-    
-    DATABASE_NAME: str = os.environ.get("DATABASE_NAME", "chat")
+    DATABASE_NAME: str = os.environ.get("DATABASE_NAME", "posts")
     DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "00000")
     DATABASE_PORT: int = int(os.environ.get("DATABASE_PORT", "port"))
 

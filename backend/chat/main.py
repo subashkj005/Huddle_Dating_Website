@@ -23,7 +23,7 @@ app.config['SECRET_KEY'] = settings.SECRET_KEY
 allowed_origins = [
     settings.FRONTEND_HOST_ADDRESS,
     settings.FRONTEND_HOST,
-    "http://localhost:5236"
+    settings.CHAT_SERVICE
 ]
 
 # Cors headers

@@ -6,13 +6,20 @@ __pycache__/
 *.pyz
 *.pyw
 *.log
+*.env
 *.sqlite3
 
 # Virtual environment
 venv/
 env/
 chat_env/
+post_venv/
+
+# Enviroment filess
 /frontend/.env
+/backend/posts/.env
+/backend/chat/.env
+
 
 # FastAPI
 .pytest_cache/

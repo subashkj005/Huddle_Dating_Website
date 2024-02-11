@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { RiVerifiedBadgeFill } from "@remixicon/react";
 import { FaQuoteRight } from "react-icons/fa6";
+import { Button, Tooltip } from "@nextui-org/react";
 import Drinks from "../badges/Drinks";
 import DatingPurpose from "../badges/DatingPurpose";
 import Smoking from "../badges/Smoking";
@@ -39,6 +40,7 @@ function Display() {
   const [handleLike, handleDislike] = useInterest();
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
+  const [isFollowed, setIsFollowed] = useState(false);
 
   let counter = 0; // Counter for slider
   let lastScrollTime = 0; // Carousel scrolltime
@@ -158,6 +160,7 @@ function Display() {
           />
         </div>
         <img className="blur-3xl" src={gradientImage} alt="" />
+
         <div className=" flex content-between absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[40%] opacity-95 p-4 z-10 rounded">
           <div
             className=" mt-10 mr-5 bg-red-400 rounded-full"
@@ -198,13 +201,29 @@ function Display() {
                   : ""
               }
               alt="Image 1"
-              className="h-[100%] w-[100%] object-cover"
+              className="h-[100%] w-[100%] object-center"
             />
             {/*  Add more images as needed  */}
           </div>
 
           {/* <!-- Right side for text or other contents --> */}
           <div className="carousel-text h-full flex justify-center items-center flex-shrink-0 w-1/2">
+            <Tooltip className={`${!isFollowed ? 'hidden' : ""}`} content="Unfollow ?" offset={15}>
+            <Button
+              className={`top-10 right-10 absolute z-10 ${
+                isFollowed
+                  ? "bg-pink-500 text-white border-default-200"
+                  : ""
+              }`}
+              color="primary"
+              radius="full"
+              size="md"
+              variant={isFollowed ? "faded" : "solid"}
+              onPress={() => setIsFollowed(!isFollowed)}
+            >
+              {isFollowed ? "Following" : "Follow"}
+            </Button>
+            </Tooltip>
             {/* <!-- Text or content items go here --> */}
             <div className="text-content ">
               <h1 className="font-sans font-semibold text-3xl flex items-center justify-center">
