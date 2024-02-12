@@ -1,5 +1,7 @@
 from flask import Blueprint, request
-from services.posts import delete_comment, follow_and_unfollow, create_post, create_user, dislike_a_post, like_a_post, user_feeds, add_comment
+from services.posts import delete_comment, follow_and_unfollow, create_post, \
+                            create_or_update_user, dislike_a_post, like_a_post, \
+                            user_feeds, add_comment
 
 
 post_route = Blueprint('posts', __name__)
@@ -14,7 +16,7 @@ def create_new_post():
 @post_route.post('/create_user')
 def create_new_user():
     post = request.get_json()
-    return create_user(post)
+    return create_or_update_user(post)
 
 
 @post_route.post('/like_post')

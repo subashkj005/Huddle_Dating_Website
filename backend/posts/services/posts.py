@@ -4,22 +4,42 @@ from models.models import Post, User
 from logger.config import logger
 
 
-def create_user(user):
+def create_or_update_user(user):
     try:
         name = user.get('name', None)
         user_id = user.get('user_id', None)
-        profile_picture = user.get('user_id', None)
+        profile_picture = user.get('profile_picture', None)
 
         if not user_id:
             return jsonify({'error': 'Invalid details'}), 400
+        
+        user_exists = User.objects.filter(user_id=user_id).first()
+        
+        if user_exists:
+            if name:
+                user_exists.name = name
+            if profile_picture:
+                user_exists.profile_picture = profile_picture
+            user_exists.save()
+            
+            logger.info(f"User updated successfully")
+            return jsonify({'message': "User updated successfully"})
+        
+        else:
+            user = User(user_id=user_id)
+            user.save()
+            
+            if name:
+                user.name = name
+            if profile_picture:
+                user.profile_picture = profile_picture
+            user.save()
 
-        user = User(name=name, user_id=user_id, profile_picture=profile_picture)
-        user.save()
-        logger.info(f"User created successfully")
-        return jsonify({'message': "User created successfully"})
+            logger.info(f"User created successfully")
+            return jsonify({'message': "User created successfully"})
     except Exception as e:
-        logger.error(f"Exception at creating user : {e}"), 500
-        return jsonify({'error': "Exception at post creation"}), 400
+        logger.error(f"Exception at creating or updating user : {e}"), 500
+        return jsonify({'error': f"Exception at creating user : {e}"}), 500
 
 
 
