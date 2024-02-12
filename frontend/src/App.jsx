@@ -20,6 +20,8 @@ import UserAuthRoute from "./utils/route_auth/UserAuthRoute";
 import AdminAuthRoute from "./utils/route_auth/AdminAuthRoute";
 import Layout from "./components/commonContent/Layout";
 import Chat from "./pages/user/ChatPage/Chat";
+import NavbarLayout from "./components/Layout2/NavbarLayout";
+import FeedsPage from "./pages/user/Feeds/FeedsPage";
 
 function App() {
   return (
@@ -50,7 +52,10 @@ function App() {
                 <Route path="chat/:chatName" element={<Chat />} />
                 <Route path="image" element={<NewFile />} />
               </Route>
-              <Route path="profile" element={<UserProfile />} />
+              <Route element={<NavbarLayout />}>
+                <Route path="profile" element={<UserProfile />} />
+                <Route path="feeds" element={<FeedsPage />} />
+              </Route>
             </Route>
             {/* Admin */}
             <Route path="admin" element={<AdminAuthRoute />}>

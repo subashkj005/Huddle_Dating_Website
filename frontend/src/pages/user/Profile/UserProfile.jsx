@@ -241,7 +241,6 @@ function UserProfile() {
 
   return (
     <>
-      <BasicNavbar />
       {modalOpen && (
         <ProfilePictureModal
           updateAvatar={updateAvatar}
