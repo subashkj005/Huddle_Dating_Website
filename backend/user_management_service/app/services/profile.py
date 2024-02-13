@@ -2,7 +2,7 @@ import asyncio
 import json
 import uuid
 from fastapi.responses import JSONResponse
-from sqlalchemy import update
+from sqlalchemy import not_
 from app.models.models import Prompt, User, UserGallery, UserInterests, Work
 from app.utils.crud import get_user, get_user_data, get_user_gallery_images, get_user_interests, get_user_prompts, get_user_work_details
 from app.logger.config import logger
@@ -200,7 +200,6 @@ async def update_user_profile(user_id, request, db):
     print('18\n')
     if images:
         print('19\n')
-        gallery = db.query(UserGallery).filter_by(user_id=user.id).delete()
         for image in images:
             # If its string means image already saved
             if type(image['image']) == str:

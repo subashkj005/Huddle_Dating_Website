@@ -1,4 +1,5 @@
 from flask import jsonify
+from utils.save_image import save_image
 from serializers.serializer import PostSchema
 from models.models import Post, User
 from logger.config import logger
@@ -9,31 +10,44 @@ def create_or_update_user(user):
         name = user.get('name', None)
         user_id = user.get('user_id', None)
         profile_picture = user.get('profile_picture', None)
+        
+        print('name = ', name )
+        print('user_id = ', user_id )
+        print('profile_picture = ', profile_picture )
 
         if not user_id:
             return jsonify({'error': 'Invalid details'}), 400
-        
+        print('-----1------')
         user_exists = User.objects.filter(user_id=user_id).first()
         
+        print('-----2------')
         if user_exists:
+            print('-----3------')
             if name:
                 user_exists.name = name
             if profile_picture:
                 user_exists.profile_picture = profile_picture
+            print('-----4------')
             user_exists.save()
+            print('-----5------')
             
             logger.info(f"User updated successfully")
             return jsonify({'message': "User updated successfully"})
         
         else:
+            print('-----6------')
             user = User(user_id=user_id)
+            print('-----7------')
             user.save()
+            print('-----8------')
             
             if name:
                 user.name = name
             if profile_picture:
                 user.profile_picture = profile_picture
+            print('-----9------')
             user.save()
+            print('-----10------')
 
             logger.info(f"User created successfully")
             return jsonify({'message': "User created successfully"})
@@ -43,23 +57,39 @@ def create_or_update_user(user):
 
 
 
-def create_post(post):
-    user_id = post.get('user_id', None)
-    content = post.get('content', None)
-    heading = post.get('heading', None)
+def create_post(request):
+    user_id = request.form.get('user_id', None)
+    content = request.form.get('content', None)
+    heading = request.form.get('heading', None)
+    image = request.files.get('image', None)
+    
     try:
         user = User.objects.filter(user_id=user_id).first()
 
         if user:
+            if image:
+                print('Image true')
+                destination, error =save_image(image, user_id)
+                
+                print('Destination = ', destination) if destination else print('No destination')
+                print('Error = ', error) if destination else print('No error')
+                if destination:
+                    post = Post(author=user, heading=heading, content=content, image=destination)
+                    post.save()
+                    return jsonify({'message': "Post created"}), 200 
+                    
+                elif error:
+                    logger.error(f"Post image upload issue : {error}"), 400
+                    return jsonify({'file_error': error }), 400
             post = Post(author=user, heading=heading, content=content)
             post.save()
-            return jsonify({'message': "Post created"}), 200
+            return jsonify({'message': "Post created"}), 200       
         else:
             logger.error(f"User ({user_id}) doesn't exist")
             return jsonify({'error': f"User {user_id} doesn't exist"}), 400
 
     except Exception as e:
-        logger.error(f"Exception at creating post : {e}"), 500
+        logger.error(f"Exception at creating post : {e}")
         return jsonify({'error': f"Exception at post creation : {e}"}), 500
     
     

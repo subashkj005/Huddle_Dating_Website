@@ -4,16 +4,18 @@ import avatar from "../../assets/images/avatar.jpg";
 import { IoIosNotifications } from "react-icons/io";
 import { useSelector, useDispatch } from "react-redux";
 import { loggedOut } from "../../redux/slices/logSlice";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { IMAGE_URL } from "../../constants/urls";
-
 
 function BasicNavbar({ image }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { name, id } = useSelector((state) => state?.logUser?.user);
   const notificationCount = 10;
-  const profilePicture = localStorage.getItem(`${id}profile_picture`)?localStorage.getItem(`${id}profile_picture`):null
+  const profilePicture = localStorage.getItem(`${id}profile_picture`)
+    ? localStorage.getItem(`${id}profile_picture`)
+    : null;
   const signoutPrompts = [
     "Ready to sign out? Or perhaps there's another profile waiting for your attention? 💌",
     "Thinking of signing out? Explore a bit more! 💎",
@@ -22,6 +24,9 @@ function BasicNavbar({ image }) {
   ];
 
   const randomIndex = Math.floor(Math.random() * signoutPrompts.length);
+
+  const currentUrl = location.pathname;
+  
 
   const logoutUser = () => {
     dispatch(loggedOut());
@@ -32,14 +37,32 @@ function BasicNavbar({ image }) {
     <>
       <div className="navbar rounded-lg">
         <div className="navbar-start">
-          
-          <Link className="navbar-item" to='/user'>
+          <Link className="navbar-item" to="/user">
             <img src={logo} style={{ width: "7rem" }} alt="logo" />
-            </Link>
+          </Link>
         </div>
         <div className="navbar-end flex items-center">
+          <div className="px-3 ">
+            <ul className="flex items-center gap-4">
+              <Link to="/user">
+                <li className={`p-2 m-2  text-center rounded-[10px] hover:bg-gradient-to-r from-purple-300 to-pink-300 text-pink-500 hover:text-white font-sans font-semibold ${ currentUrl === '/user' ? 'border-b-2 border-pink-400' : ""}`}>
+                  Home
+                </li>
+              </Link>
+              <Link to="/user/feeds">
+                <li className={`p-2 m-2  text-center rounded-[10px] hover:bg-gradient-to-r from-purple-300 to-pink-300 text-pink-500 hover:text-white font-sans font-semibold ${ currentUrl === '/user/feeds' ? 'border-b-2 border-pink-400' : ""}`}>
+                  Feeds
+                </li>
+              </Link>
+              <Link to="/user/profile">
+                <li className={`p-2 m-2  text-center rounded-[10px] hover:bg-gradient-to-r from-purple-300 to-pink-300 text-pink-500 hover:text-white font-sans font-semibold ${ currentUrl === '/user/profile' ? 'border-b-2 border-pink-400' : ""}`}>
+                  Profile
+                </li>
+              </Link>
+            </ul>
+          </div>
           {/* Notification bell icon with dropdown */}
-          <div className="dropdown-container">
+          <div className="dropdown-container mr-2">
             <div className="dropdown">
               <label
                 className="btn btn-ghost flex cursor-pointer px-0"
@@ -53,7 +76,7 @@ function BasicNavbar({ image }) {
                       10
                     </span>
                   )}
-                  <IoIosNotifications size={30} color="#00ccff" />
+                  <IoIosNotifications size={30} color="#ca8bff" />
                 </span>
               </label>
               <div className="dropdown-menu dropdown-menu-bottom-left">
@@ -78,7 +101,11 @@ function BasicNavbar({ image }) {
                 <div className="dropdown ">
                   <label className="btn flex bg-white px-0 " tabIndex="0">
                     <img
-                      src={profilePicture ? `${IMAGE_URL}${profilePicture}` : avatar}
+                      src={
+                        profilePicture
+                          ? `${IMAGE_URL}${profilePicture}`
+                          : avatar
+                      }
                       alt="avatar"
                       style={{ height: "100%" }}
                       className="rounded-full"
@@ -123,9 +150,7 @@ function BasicNavbar({ image }) {
               Logout
             </button>
             <label htmlFor="modal-3" className="model-close">
-              <button className="btn btn-block ">
-                Cancel
-              </button>
+              <button className="btn btn-block ">Cancel</button>
             </label>
           </div>
         </div>

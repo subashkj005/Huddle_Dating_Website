@@ -9,8 +9,7 @@ post_route = Blueprint('posts', __name__)
 
 @post_route.post('/create_post')
 def create_new_post():
-    post = request.get_json()
-    return create_post(post)
+    return create_post(request) 
 
 
 @post_route.post('/create_user')
@@ -40,7 +39,9 @@ def get_user_feeds(page):
 @post_route.post('/follow_user')
 def follow_user():
     data = request.get_json()
+    print('data ======== ', data)
     return follow_and_unfollow(data)
+
 
 
 @post_route.post('/add_comment')

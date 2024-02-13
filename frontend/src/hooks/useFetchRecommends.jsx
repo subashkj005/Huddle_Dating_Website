@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { batch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import axiosInstance from "../axios/axiosInstance";
 import { USERS_URL } from "../constants/urls";
 import { socketConnection } from "../socket/socketConfig";

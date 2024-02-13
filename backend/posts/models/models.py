@@ -5,7 +5,7 @@ from mongoengine import Document, StringField, ReferenceField, DateTimeField,\
 
 
 class User(Document):
-    name = StringField(required=True)
+    name = StringField()
     user_id = StringField(required=True, unique=True) 
     profile_picture = StringField()
     following = ListField(ReferenceField('User'))  
@@ -52,6 +52,7 @@ class Post(Document):
     author = ReferenceField(User, required=True)
     content = StringField(required=True)
     heading = StringField()
+    image = StringField()
     created_at = DateTimeField(required=True, default=datetime.now())
     likes = EmbeddedDocumentListField('Like')
     comments = EmbeddedDocumentListField('Comment')

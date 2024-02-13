@@ -9,6 +9,7 @@ settings = get_settings()
 
 
 app = Flask(__name__)
+app = Flask(__name__, static_folder='media')
 
 # Kafka
 kafka_init_app(app)

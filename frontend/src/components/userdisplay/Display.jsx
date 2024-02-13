@@ -18,11 +18,12 @@ import { toast as hottoast } from "react-hot-toast";
 import { MdCancel } from "react-icons/md";
 import { BsLightningFill } from "react-icons/bs";
 import fake_details from "../../temp_data/user_data";
-import { IMAGE_URL, USERS_URL } from "../../constants/urls";
+import { IMAGE_URL, POST_URL, USERS_URL } from "../../constants/urls";
 import UserSettings from "../userSettingsModal/UserSettings";
 import axiosInstance from "../../axios/axiosInstance";
 import useFetchRecommends from "../../hooks/useFetchRecommends";
 import useInterest from "../../hooks/useInterest";
+import { useSelector } from "react-redux";
 
 function Display() {
   const [
@@ -41,9 +42,12 @@ function Display() {
   const [animation, setAnimation] = useState(false);
   const [slides, setSlides] = useState([]);
   const [isFollowed, setIsFollowed] = useState(false);
+  const userId = useSelector(state => state.logUser.user.id)
 
   let counter = 0; // Counter for slider
   let lastScrollTime = 0; // Carousel scrolltime
+
+  console.log('data = ', data)
 
   const handleSlideChange = (movement, liked_id = null, disliked_id = null) => {
     if (movement == "forward" && accountIndex < data?.length) {
@@ -95,6 +99,22 @@ function Display() {
     }
     handleSlidePosition();
   };
+
+  const handleUserFollow = (followed_id) => {
+    const data = {
+      'followed_id': followed_id,
+      'user_id': userId, 
+      'task': isFollowed?'unfollow':'follow'
+    }
+    axiosInstance.post(`${POST_URL}/follow_user`, data)
+    .then((res)=>{
+      console.log('res of follow = ',res)
+    })
+    .catch((err)=>{
+    console.log('err of follow = ',err)
+
+    })
+  }
 
   const handleSlidePosition = () => {
     slides.forEach((e) => {
@@ -215,6 +235,7 @@ function Display() {
                   ? "bg-pink-500 text-white border-default-200"
                   : ""
               }`}
+              onClick={()=>handleUserFollow(account?.user_id)}
               color="primary"
               radius="full"
               size="md"
