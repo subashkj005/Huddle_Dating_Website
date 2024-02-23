@@ -47,7 +47,6 @@ def validate_token(access_token):
     try:
         payload = jwt.decode(access_token, settings.JWT_SECRET,
                              algorithms=settings.JWT_ALGORITHM)
-        print('payload of access token = ', payload)
         return None, payload
     except ExpiredSignatureError:
         logger.error('Access token expired')

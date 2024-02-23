@@ -91,6 +91,8 @@ Thumbs.db
 /backend/user_management_service/alembic.ini
 /backend/api_gateway/api_venv/
 /backend/api_gateway/.env
+/backend/admin/admin_venv
+/backend/admin/.env
 /temp/
 /frontend/src/temp_data/
 

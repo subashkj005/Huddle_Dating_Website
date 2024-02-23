@@ -51,9 +51,9 @@ def add_message_to_room(message):
             logger.error("Invalid sender id")
             return jsonify({'error': "Invalid sender id"}), 404
         
-        if chatroom_exists.is_expired:
-            logger.error("Chat expired")
-            return jsonify({'error': 'Chat expired'}), 400
+        # if chatroom_exists.is_expired:
+        #     logger.error("Chat expired")
+        #     return jsonify({'error': 'Chat expired'}), 400
 
         msg = Message(sender_id=sender_id,
                     chatroom=chatroom_exists,
@@ -69,6 +69,7 @@ def add_message_to_room(message):
         
         
 def get_chatroom_messages(chatroom_name):
+    logger.info('get_message called')
     if not chatroom_name:
         return jsonify({'error': "Invalid data"}), 404
     

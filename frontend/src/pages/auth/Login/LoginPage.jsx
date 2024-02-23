@@ -9,7 +9,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { LoadingContext } from "../../../context/LoadingContext";
 import { useDispatch } from "react-redux";
 import { loggedIn } from "../../../redux/slices/logSlice";
-import { storeSettings } from "../../../redux/slices/userSettingSlice";
+import { UserPictureContext } from "../../../context/UserPictureContext";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,6 +18,7 @@ function LoginPage() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const {handleFetch} = useContext(UserPictureContext)
   const { showLoading, hideLoading } = useContext(LoadingContext);
 
   const handleSubmit = (e) => {
@@ -39,7 +40,7 @@ function LoginPage() {
       .then((res) => {
         if (res.status == "200") {
           dispatch(loggedIn(res.data.user));
-          navigate("home");
+          navigate("user");
         }
       })
       .catch((err) => {
@@ -52,6 +53,7 @@ function LoginPage() {
       })
       .finally(() => {
         hideLoading();
+        handleFetch()
       });
 
     setErrorMessage("");

@@ -4,15 +4,19 @@ USER_SERVICE = "user-service"
 
 public_services = {
     "public": "http://localhost:7614/",
-    "admin_auth": "http://localhost:7614/",
+    "admin_auth": "http://localhost:8931/",
 }
 
 
 protected_services = {
     "users": "http://localhost:7614/",
-    "admin": "http://localhost:7614/",
     "chat": "http://localhost:5236/",
-    "posts": "http://localhost:9639/"
+    "posts": "http://localhost:9639/",
+    
+    # Admin
+    "admin": "http://localhost:8931/",
+    "admin_access": "http://localhost:7614/",
+    "admin_post": "http://localhost:9639/",
 }
 
 

@@ -40,12 +40,13 @@ function AdminLogin() {
 
     showAdminLoading()
 
-    axiosInstance.post(`${ADMIN_AUTH}/login`, formData)
+    axiosInstance.post(`${ADMIN_AUTH}/admin_login`, formData)
     .then((res)=> {
       if (res.status === 200) {
         dispatch(loggedIn(res.data.user))
+        console.log('res at ad login, ', res)
         toast.success(res.data.message)
-        navigate('/admin/home')
+        navigate('/admin')
       }
     })
     .catch((err)=>{

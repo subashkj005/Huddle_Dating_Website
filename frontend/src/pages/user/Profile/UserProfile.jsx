@@ -1,5 +1,4 @@
 import React, { useState, useContext, useEffect } from "react";
-import BasicNavbar from "../../../components/navbar/BasicNavbar";
 import ImageUpload from "../../../components/imageUpload/ImageUpload";
 import { createFormData } from "../../../utils/fileManagement/fileUpload";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -18,9 +17,11 @@ import { LoadingContext } from "../../../context/LoadingContext";
 import { useSelector } from "react-redux";
 import validateImage from "../../../utils/fileManagement/imageValidations";
 import ProfilePictureModal from "../../../components/modals/ProfilePictureModal";
+import { UserPictureContext } from "../../../context/UserPictureContext";
 
 function UserProfile() {
   const { showLoading, hideLoading } = useContext(LoadingContext);
+  const { handleFetch } = useContext(UserPictureContext)
   const user_id = useSelector((state) => state.logUser.user.id);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -169,10 +170,6 @@ function UserProfile() {
   };
 
   const handleSubmit = () => {
-    // if ((!formData.name || !data.user.name) || (!formData.date_of_birth || !data.user.date_of_birth) || (!formData.gender || !data.user.gender) || (!formData.interested_in || !data.user.interested_in)) {
-    //   toast.warning("Enter required fields");
-    //   return null;
-    // }
 
     let data = createFormData(
       { ...formData, prompts, profile_picture },
@@ -185,7 +182,11 @@ function UserProfile() {
       `http://localhost:7614/users/profileupdate/?user_id=${user_id}`,
       data
     );
-
+    
+    promise
+    .then((res)=>{
+      console.log('res from profile update => ', res)
+    })
     hottoast.promise(
       promise,
       {
@@ -211,6 +212,7 @@ function UserProfile() {
       })
       .finally(() => {
         hideLoading();
+        handleFetch()
       });
   };
 

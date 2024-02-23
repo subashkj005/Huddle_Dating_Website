@@ -36,3 +36,8 @@ class UserSettingsSchema(BaseModel):
     min_age: str
     max_age: str
     gender: str
+    
+
+class UserNameandImage(BaseModel):
+    name: str
+    profile_picture: str

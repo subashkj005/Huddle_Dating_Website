@@ -96,20 +96,20 @@ def get_recommendations(db, user_id='0d92defe-575e-4d2a-aed6-db53fcebbeaa', batc
         return JSONResponse(content={'message': "User has no settings"})
     # accounts = db.query(User).filter(~db.query(Visit).filter(Visit.visitor_id==user_id).exists(), User.age>=user.visits.min_age or User.age<=user.visits.max_age, User.gender==user.visits.gender).all()
 
-    # accounts = (db.query(User)
-    #             .join(User.settings)
-    #             .filter(
-    #                 ~db.query(Visit)
-    #                 .filter(Visit.visitor_id == user_id).exists(),
-    #                 User.age >= user.settings.min_age,
-    #                 User.age <= user.settings.max_age,
-    #                 User.gender == user.settings.gender
-    #             )
-    #             .offset(offset).limit(batch_size).all()
-    # )
+    accounts = (db.query(User)
+                .join(User.settings)
+                .filter(
+                    ~db.query(Visit)
+                    .filter(Visit.visitor_id == user_id).exists(),
+                    User.age >= user.settings.min_age,
+                    User.age <= user.settings.max_age,
+                    User.gender == user.settings.gender
+                )
+                .offset(offset).limit(batch_size).all()
+    )
 
-    accounts = db.query(User).filter(not_(User.id == user_id)
-                                     ).order_by(desc(User.created_at)).offset(offset).limit(batch_size).all()
+    # accounts = db.query(User).filter(not_(User.id == user_id)
+    #                                  ).order_by(desc(User.created_at)).offset(offset).limit(batch_size).all()
 
     return serialize_users(accounts)
 
@@ -337,3 +337,15 @@ async def update_match_accounts_seen(db, data):
     except SQLAlchemyError as e:
         logger.error(f"Exception at updating match seen : ", {e})
         return JSONResponse(content={'error': e}, status_code=500)
+    
+    
+async def get_profile_picture(db, user_id):
+    if not user_id:
+        return JSONResponse(content={'error': "Invalid details"}, status_code=400)
+    
+    user = db.query(User).filter_by(id=user_id).first()    
+    if not user:
+        return JSONResponse(content={'error': "User doesn't exists"}, status_code=404)
+    
+    return {'userImage': user.profile_picture, 'name': user.name}
+    

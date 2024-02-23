@@ -1,4 +1,4 @@
-from models.models import Post, Comment, User
+from models.models import Post, Comment, Report, User
 from marshmallow_mongoengine import ModelSchema
 from marshmallow import fields, post_dump
 
@@ -39,8 +39,31 @@ class PostSchema(ModelSchema):
  
     def filter_active_comments(self, post):
         active_comments = [comment for comment in post.comments if comment.active]
-        print(active_comments, '== active_comments')
-        return CommentSchema(many=True).dump(active_comments)
+        result =  CommentSchema(many=True).dump(active_comments)
+        return result
+    
+    
+class PostForReportSchema(ModelSchema):
+    class Meta:
+        model = Post
+        
+            
+class PostReportSchema(ModelSchema):
+    class Meta:
+        model = Report
+        exclude = ('review_comment',)
+        
+    reported_by = fields.Nested(UserSchema)
+    reported_post = fields.Nested(PostSchema)
+    reason = fields.String()
+    reviewed = fields.Boolean()
+    review_comment = fields.String()
+    reported_at = fields.Function(
+        lambda report: report.reported_at.strftime("%dth %B %Y at %I:%M%p"))
+    
+    
+
+    
     
 
 

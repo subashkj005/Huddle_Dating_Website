@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from services.posts import delete_comment, follow_and_unfollow, create_post, \
-                            create_or_update_user, dislike_a_post, like_a_post, \
+                            create_or_update_user, dislike_a_post, like_a_post, register_report, \
                             user_feeds, add_comment
 
 
@@ -30,18 +30,16 @@ def dislike_post():
     return dislike_a_post(data)
 
 
-@post_route.get('/get_feeds/<int:page>')
+@post_route.post('/get_feeds/<string:page>')
 def get_user_feeds(page):
     data = request.get_json()
-    return user_feeds(data=data, page=page)
+    return user_feeds(data=data, page=int(page))
 
 
 @post_route.post('/follow_user')
 def follow_user():
     data = request.get_json()
-    print('data ======== ', data)
     return follow_and_unfollow(data)
-
 
 
 @post_route.post('/add_comment')
@@ -54,6 +52,12 @@ def add_new_comment():
 def delete_a_comment():
     data = request.get_json()
     return delete_comment(data)
+
+
+@post_route.post('/register_report')
+def register_post_report():
+    data = request.get_json()
+    return register_report(data)
 
 
 

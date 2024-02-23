@@ -1,3 +1,4 @@
+from app.response.user import UserNameandImage
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
 from app.config.database import db_dependency
@@ -12,7 +13,7 @@ profile_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@profile_router.post('update/' )
+@profile_router.post('update/', response_model=UserNameandImage )
 async def update_profile(request: Request, user_id: str, db:db_dependency):
     datas = await request.form()
     for key, value in datas.items():

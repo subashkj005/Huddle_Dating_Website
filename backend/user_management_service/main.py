@@ -8,6 +8,7 @@ from admin.routes.admin import admin_router
 from admin.routes.users import user_related_router
 from app.routes.auth import auth_router
 from app.routes.profile import profile_router
+from app.routes.admin import admin_router
 from starlette.middleware.authentication import AuthenticationMiddleware
 from app.config.security import JWTAuth
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,6 +38,7 @@ app.include_router(guest_router) # /auth
 app.include_router(auth_router) # /auth
 app.include_router(user_router) # /users
 app.include_router(profile_router) # /users/profile
+app.include_router(admin_router) # /admin_access
 
 # Admin
 app.include_router(admin_router) # /admin

@@ -86,6 +86,7 @@ class Post(Document):
         new_comment = Comment(commentor=commentor, comment=comment )
         self.comments.append(new_comment)
         self.save()
+        return new_comment
         
         
     def delete_comment(self, comment):
@@ -94,6 +95,15 @@ class Post(Document):
                 each_comment.active = False
                 self.save()
                 return
+            
+            
+class Report(Document):
+    reported_post = ReferenceField(Post, required=True)
+    reported_by = ReferenceField(User, required=True)
+    reason = StringField(required=True)
+    reported_at = DateTimeField(default=datetime.now())
+    reviewed = BooleanField(default=False)
+    review_comment = StringField(null=True)
         
         
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import logo from "../../assets/images/logo_png_hd-cropped.png";
 import avatar from "../../assets/images/avatar.jpg";
 import { IoIosNotifications } from "react-icons/io";
@@ -6,16 +6,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { loggedOut } from "../../redux/slices/logSlice";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { IMAGE_URL } from "../../constants/urls";
+import { UserPictureContext } from "../../context/UserPictureContext";
 
 function BasicNavbar({ image }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { name, id } = useSelector((state) => state?.logUser?.user);
+  const { userImage, name, setUserImage, setName } = useContext(UserPictureContext)
+  const { id } = useSelector((state) => state?.logUser?.user);
   const notificationCount = 10;
-  const profilePicture = localStorage.getItem(`${id}profile_picture`)
-    ? localStorage.getItem(`${id}profile_picture`)
-    : null;
   const signoutPrompts = [
     "Ready to sign out? Or perhaps there's another profile waiting for your attention? 💌",
     "Thinking of signing out? Explore a bit more! 💎",
@@ -30,6 +29,8 @@ function BasicNavbar({ image }) {
 
   const logoutUser = () => {
     dispatch(loggedOut());
+    setName(null)
+    setUserImage(null)
     navigate("/");
   };
 
@@ -70,7 +71,7 @@ function BasicNavbar({ image }) {
               >
                 {/* Add your notification bell icon here */}
 
-                <span className="material-icons">
+                <span className="material-icons opacity-0">
                   {notificationCount > 0 && (
                     <span className="absolute -mt-1 ml-1 rounded-full bg-[#fb5ba5] px-1 text-white text-[0.7rem]">
                       10
@@ -102,8 +103,8 @@ function BasicNavbar({ image }) {
                   <label className="btn flex bg-white px-0 " tabIndex="0">
                     <img
                       src={
-                        profilePicture
-                          ? `${IMAGE_URL}${profilePicture}`
+                        userImage
+                          ? userImage
                           : avatar
                       }
                       alt="avatar"

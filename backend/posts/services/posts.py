@@ -1,7 +1,7 @@
-from flask import jsonify
+from flask import jsonify, request
 from utils.save_image import save_image
-from serializers.serializer import PostSchema
-from models.models import Post, User
+from serializers.serializer import CommentSchema, PostSchema
+from models.models import Post, Report, User
 from logger.config import logger
 
 
@@ -67,23 +67,26 @@ def create_post(request):
         user = User.objects.filter(user_id=user_id).first()
 
         if user:
+            post_schema = PostSchema()
             if image:
                 print('Image true')
                 destination, error =save_image(image, user_id)
                 
-                print('Destination = ', destination) if destination else print('No destination')
-                print('Error = ', error) if destination else print('No error')
+                
                 if destination:
                     post = Post(author=user, heading=heading, content=content, image=destination)
                     post.save()
-                    return jsonify({'message': "Post created"}), 200 
+                    created_post = post_schema.dump(post)
+                    print('created_post =>', created_post)
+                    return jsonify({'message': "Post created", 'created_post' : created_post}), 200 
                     
                 elif error:
                     logger.error(f"Post image upload issue : {error}"), 400
                     return jsonify({'file_error': error }), 400
             post = Post(author=user, heading=heading, content=content)
             post.save()
-            return jsonify({'message': "Post created"}), 200       
+            created_post = post_schema.dump(post)
+            return jsonify({'message': "Post created", 'created_post' : created_post}), 200       
         else:
             logger.error(f"User ({user_id}) doesn't exist")
             return jsonify({'error': f"User {user_id} doesn't exist"}), 400
@@ -114,13 +117,13 @@ def like_a_post(data):
     post = Post.objects.filter(id=post_id).first()
     user = User.objects.filter(user_id=liker_id).first()
     
-    length = post.count_of_likes()
+    # length = post.count_of_likes()
     
     if not post or not user:
         return jsonify({'error': 'Post or user not found'}), 404
     
     post.like(user)
-    return jsonify({'message': f"Post liked = {length}"}), 200
+    return jsonify({'message': f"Post liked"}), 200
     
 
 def dislike_a_post(data):
@@ -131,9 +134,7 @@ def dislike_a_post(data):
         return jsonify({'error': 'Invalid details'}), 400
     
     post = Post.objects.filter(id=post_id).first()
-    user = User.objects.filter(user_id=liker_id)
-    
-    
+    user = User.objects.filter(user_id=liker_id).first()
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -211,8 +212,10 @@ def add_comment(data):
         if not user or not post:
             return jsonify({'error': "User or Post doesn't exist"}), 404
         
-        post.add_comment(user, comment)
-        return jsonify({'message': "Added new comment Successfully"}), 200
+        new_comment_obj = post.add_comment(user, comment)
+        comment_schema = CommentSchema()
+        new_comment = comment_schema.dump(new_comment_obj)
+        return jsonify({'message': "Added new comment Successfully", 'comment': new_comment}), 200
         
     except Exception as e:
         logger.error(f"Exception at adding comment: {e}"), 500
@@ -253,5 +256,33 @@ def delete_comment(data):
         return jsonify({'error': f"Exception at adding comment : {e}"}), 400
     
     
+def register_report(data):
+    user_id = data.get('user_id', None)
+    post_id = data.get('post_id', None)
+    reason = data.get('reason', None)
+    
+    try:
+        if not user_id or not post_id or not reason:
+            return jsonify({"error": "Invalid details"}), 400
+    
+        user = User.objects.filter(user_id=user_id).first()
+        post = Post.objects.filter(id=post_id).first()
+        
+        if not user or not post:
+            return jsonify({"error": "User or Post not found"}), 404
+        
+        report = Report.objects.filter(reported_post=post, reported_by=user).first()
+        
+        if report:
+            return jsonify({"error": "Already reported"}), 400
+        
+        report = Report(reported_post=post, reported_by=user, reason=reason)
+        report.save()
+        
+        return jsonify({"message": "Report Submitted"}), 200
+    except Exception as e:
+        logger.error(f"Exception at adding report: {e}")
+        return jsonify({"error": "Exception at adding report"}), 500
+        
     
     

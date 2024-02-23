@@ -6,9 +6,15 @@ def save_image(post_image, user_id):
     ALLOWED_EXTENSIONS = ['jpg', 'png', 'jpeg']
     MAX_IMAGE_SIZE = 5242880  # 5 MB
     error = None
+    
 
     try:
-        file = post_image.file
+        print('type of image = ', type(post_image))
+        print(dir(post_image))
+        print(vars(post_image))
+        
+        
+        file = post_image
         filename = post_image.filename
         extension = filename.split(".")[-1]
         file_type = post_image.content_type.split("/")[0]
@@ -23,10 +29,10 @@ def save_image(post_image, user_id):
             logger.error(error)
             return None, error
 
-        if post_image.size > MAX_IMAGE_SIZE:
-            error = f"Image size should be below 5MB"
-            logger.error(error)
-            return None, error
+        # if post_image.size > MAX_IMAGE_SIZE:
+        #     error = f"Image size should be below 5MB"
+        #     logger.error(error)
+        #     return None, error
 
         unique_filename = f"{uuid.uuid4()}-{filename}"
         destination = f"media/posts_images/{user_id}-{unique_filename}"

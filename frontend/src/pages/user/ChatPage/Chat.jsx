@@ -24,11 +24,12 @@ function Chat() {
 
   useEffect(() => {
     socket.current = io(CHAT_SOCKET);
-
+    console.log('getting messages')
     axiosInstance
       .get(`${CHAT_URL}/get_messages/${chatName}`)
       .then((res) => {
         setMessages(res.data.messages);
+        console.log('chat res = ', res)
       })
       .catch((err) => {
         console.error("chat err ==>", err);

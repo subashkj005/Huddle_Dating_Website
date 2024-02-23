@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useSelector } from "react-redux";
 import { Avatar, Button } from "@nextui-org/react";
 import { toast } from "react-toastify";
+import { toast as hottoast } from "react-hot-toast";
 import { BsImages } from "react-icons/bs";
 import { FaHeading } from "react-icons/fa6";
 import axiosInstance from "../../axios/axiosInstance";
 import { POST_URL } from "../../constants/urls";
+import { UserPictureContext } from "../../context/UserPictureContext";
 
-function CreatePost() {
+function CreatePost({posts, setPosts}) {
   const [image, setImage] = useState(null);
   const [content, setContent] = useState("");
   const [heading, setHeading] = useState("");
   const [headingTrigger, setHeadingTrigger] = useState(false);
+  const { userImage, name } = useContext(UserPictureContext)
 
   const userId = useSelector((state) => state.logUser.user.id);
 
@@ -37,39 +40,57 @@ function CreatePost() {
   };
 
   const handleCreatePost = () => {
-    const data = new FormData();
-    data.append("image", image);
-    data.append("content", content);
-    data.append("heading", heading);
-    data.append("user_id", userId);
+    const formData = new FormData();
+    formData.append("user_id", userId);
+    formData.append("content", content);
+    formData.append("heading", heading);
+    formData.append("image", image);
 
-    console.log('data = ', data)
+    // console.log('data got from formdata = ', formData.get('image'))
+    // console.log('image = ', image)
+    // console.log('heading = ', heading)
+    // console.log('user_id = ', userId)
+
+    // const new_data = {'user': "data"}
+    // console.log(POST_URL, 'POST URL')
 
     axiosInstance
-      .post(`${POST_URL}/create_post`, data)
+    .post(`${POST_URL}/create_post`, formData, {
+      headers: {
+          'Content-Type': 'multipart/form-data'
+      }
+  })
       .then((res) => {
-        console.log("create post res = ", res);
-        console.log('data after = ', data)
+        // console.log("create post res = ", res);
+        hottoast.success("Tada..! new post created")
+        setPosts([res?.data?.created_post, ...posts])
+        setImage(null)
+        setContent("")
+        setHeading("")
+        setHeadingTrigger(false)
       })
       .catch((err) => {
         if(err?.response?.data?.file_error) {
           toast.error(err?.response?.data?.file_error)
         }
-        console.log("create post err = ", err);
+        // console.log("create post err = ", err);
       })
-      .finally(() => {});
+      .finally(() => {
+        // console.log('form data = ', formData.get('user_id'))
+        
+      });
   };
 
   return (
     <>
-      <div className="my-3 p-4 bg-white rounded-[5px] min-w-[580px]">
+      <div className="my-3 p-4 bg-white rounded-[10px] min-w-[580px]">
         <div className="flex gap-4 p-1 justify-evenly w-full">
           <Avatar
-            src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
+            src={userImage && userImage}
             size="md"
           />
           <textarea
-            className="rounded-md text-black text-base border-slate-300 focus:bg-slate-100 focus:border-slate-300 max-w-[400px] w-full"
+            className="rounded-md text-black text-base border-slate-300 focus:bg-slate-100 focus:border-slate-300 max-w-[388px] w-full"
             type="text"
             value={content}
             onChange={handleContent}

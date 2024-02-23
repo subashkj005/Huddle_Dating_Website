@@ -59,6 +59,7 @@ function Display() {
         handleDislike(disliked_id);
       }
 
+      setIsFollowed(false)
       setAccountIndex((prevState) => prevState + 1);
       setAnimation(true);
       setTimeout(() => {
@@ -104,7 +105,7 @@ function Display() {
     const data = {
       'followed_id': followed_id,
       'user_id': userId, 
-      'task': isFollowed?'unfollow':'follow'
+      'task': !isFollowed?'unfollow':'follow'
     }
     axiosInstance.post(`${POST_URL}/follow_user`, data)
     .then((res)=>{
@@ -166,12 +167,24 @@ function Display() {
       >
         <div
           className={`loading-div z-20 w-full h-full relative ${
-            data?.length !== 0 ? "hidden" : ""
+            data ? "hidden" : ""
           }`}
         >
           <div className="rhombus absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="circle1"></div>
             <div className="circle2"></div>
+          </div>
+          <img
+            className=" object-cover w-screen h-screen"
+            src={loadingBg}
+            alt=""
+          />
+        </div>
+        <div
+          className={`loading-div z-20 w-full h-full relative`}
+        >
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            
           </div>
           <img
             className=" object-cover w-screen h-screen"
@@ -188,7 +201,7 @@ function Display() {
           >
             <MdCancel color="white" size={88} className="hover:text-red-500" />
           </div>
-          <div className=" mb-10 bg-red-400 rounded-full">
+          <div className=" mb-10 bg-red-400 rounded-full opacity-0">
             <BsLightningFill size={88} className="p-2" />
           </div>
           <div className="mt-10 ml-5 p-2 bg-[#f7adcf] rounded-full flex justify-center items-center">

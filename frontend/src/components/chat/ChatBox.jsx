@@ -22,7 +22,7 @@ const ChatBox = ({
   let owner = user?.name;
   let ownerAvatar = profilePicture ? `${IMAGE_URL}${profilePicture}` : avatar;
   let owner_id = user?.id;
-  console.log('OWNER AVATAR =>', ownerAvatar)
+
 
   const recipientAvatar =
     `${IMAGE_URL}${chatDetails?.profile_picture}` || avatar;

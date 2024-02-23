@@ -4,12 +4,15 @@ from config.database import init_app
 from kafka_conf.config import kafka_init_app, bus
 from config.settings import get_settings
 from routes.posts import post_route
+from routes.admin import adminpost_route
 
 settings = get_settings()
 
 
-app = Flask(__name__)
 app = Flask(__name__, static_folder='media')
+
+# Secret key
+app.config['SECRET_KEY'] = settings.SECRET_KEY
 
 # Kafka
 kafka_init_app(app)
@@ -27,6 +30,7 @@ cors = CORS(app,
 
 # Routes
 app.register_blueprint(post_route, url_prefix='/posts')
+app.register_blueprint(adminpost_route, url_prefix='/admin_post')
 
 # MongoDB initialize
 init_app(app=app)

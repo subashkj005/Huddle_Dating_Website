@@ -12,7 +12,7 @@ function AdminHeader() {
 
   const logoutUser = () => {
     dispatch(loggedOut())
-    navigate('/admin')
+    navigate('/adminAuth')
   }
 
   return (

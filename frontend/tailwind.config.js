@@ -12,6 +12,9 @@ module.exports = {
   darkMode: "class",
   plugins: [nextui({}),
             require("rippleui"),
+            require('postcss-nested'),
+            require('tailwindcss'),
+            require('autoprefixer'),
             require('@tailwindcss/forms'),
           ],
 }
