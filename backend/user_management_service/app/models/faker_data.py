@@ -24,7 +24,7 @@ def create_fake_user(session):
         weight=fake.random_int(min=40, max=120),
         location=fake.city(),
         gender=fake.random_element(
-            elements=(Gender.MALE, Gender.FEMALE, Gender.OTHERS)),
+            elements=(Gender.MALE, Gender.FEMALE)),
         profile_picture=fake.image_url(),
         latitude=fake.latitude(),
         longitude=fake.longitude(),

@@ -7,8 +7,7 @@ from logger.config import logger
 
 settings = get_settings()
 
-sio = SocketIO(cors_allowed_origins=[
-               settings.FRONTEND_HOST, settings.FRONTEND_HOST_ADDRESS], async_mode="threading")
+sio = SocketIO(cors_allowed_origins='*', async_mode="threading")
 
 active_connections = {}
 rooms = {}

@@ -36,7 +36,7 @@ async def update_user_search_settings(db: db_dependency, user_id: str, data: dic
 
 
 @user_router.get('/get_settings/{user_id}')
-async def get_user_search_settings(db: db_dependency, user_id: str):
+async def get_user_search_settings(db: db_dependency, user_id: str ):
     return await get_user_settings(db, user_id)
 
 

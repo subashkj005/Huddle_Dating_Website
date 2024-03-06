@@ -1,19 +1,8 @@
-version: '3'
+version: '3.9'
 
 services:
-  flask-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  huddle-api-gateway:
+    container_name: huddle-api-gateway-service
+    image: subashkj005/huddle-dating:api-gateway
     ports:
       - "5001:5001"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
-
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"

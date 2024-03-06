@@ -1,3 +1,4 @@
+import os
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import socketio
@@ -21,8 +22,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost",
-    "http://localhost:5001",
-    "http://localhost:3000"
+    "http://34.165.86.84:5001",
+    "http://localhost:3000", "https://huddle-frontend-nu.vercel.app"
 ]
 
 app.add_middleware(

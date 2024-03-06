@@ -18,6 +18,9 @@ class Settings():
     DATABASE_NAME: str = os.environ.get("DATABASE_NAME", "posts")
     DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "00000")
     DATABASE_PORT: int = int(os.environ.get("DATABASE_PORT", "port"))
+    
+    KAFKA_SERVER: str = os.environ.get("KAFKA_SERVER", 'kafka')
+    KAFKA_GROUP_ID: str = os.environ.get("KAFKA_GROUP_ID", 'group_id')
 
 
 

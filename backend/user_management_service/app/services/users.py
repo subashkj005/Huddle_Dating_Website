@@ -10,7 +10,7 @@ from app.response.user import ImageSchema, InterestSchema, PromptsSchema, UserSc
 from app.serializers.serializer import UserMatchedList
 from app.utils.crud import get_user, get_user_data, get_user_interests, get_user_prompts
 from app.logger.config import logger
-from sqlalchemy import desc, not_, or_, update
+from sqlalchemy import desc, not_, or_, update, and_
 from sqlalchemy.exc import SQLAlchemyError
 from socket_config.crud import connections
 from socket_config.socket import match_found
@@ -96,17 +96,24 @@ def get_recommendations(db, user_id='0d92defe-575e-4d2a-aed6-db53fcebbeaa', batc
         return JSONResponse(content={'message': "User has no settings"})
     # accounts = db.query(User).filter(~db.query(Visit).filter(Visit.visitor_id==user_id).exists(), User.age>=user.visits.min_age or User.age<=user.visits.max_age, User.gender==user.visits.gender).all()
 
+    subquery = db.query(Visit.visited_id).filter(Visit.visitor_id == user_id)
+    
     accounts = (db.query(User)
                 .join(User.settings)
                 .filter(
-                    ~db.query(Visit)
-                    .filter(Visit.visitor_id == user_id).exists(),
+                    User.name != None,
+                    User.age != None,
                     User.age >= user.settings.min_age,
                     User.age <= user.settings.max_age,
-                    User.gender == user.settings.gender
+                    User.gender == user.settings.gender,
+                    User.id != user_id,
+                    ~User.visits.any(and_(Visit.visitor_id == user_id, Visit.visited_id == User.id))
                 )
+                .order_by(desc(User.created_at))
                 .offset(offset).limit(batch_size).all()
     )
+    
+    logger.error(f'===== Length of Accounts fetched : {len(accounts)} ======')
 
     # accounts = db.query(User).filter(not_(User.id == user_id)
     #                                  ).order_by(desc(User.created_at)).offset(offset).limit(batch_size).all()
@@ -291,6 +298,7 @@ async def get_user_matched_list(db, user_id, is_seen=False):
             ),
             Matchings.expired == False
         ).all()
+        logger.info(f"Length of bi side matches == {len(bi_side_matches)}")
     except SQLAlchemyError as e:
         print(f"Exception at filtering matches : {e}")
         return JSONResponse(content={'error': e}, status_code=500)

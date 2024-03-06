@@ -29,7 +29,7 @@ allowed_origins = [
 # Cors headers
 cors = CORS(app,
             resources={
-                r"/*": {"origins": allowed_origins}},
+                r"/*": {"origins": "*"}},
             methods=['GET', 'POST', 'PUT', 'PATCH',
                      'DELETE', 'OPTIONS', 'HEAD'],
             supports_credentials=True,

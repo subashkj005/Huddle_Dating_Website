@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  users-mysql-db:
+    image: mysql-users:0.1
+    ports:
+      - "3306:3306"
+    networks:
+      - testNetworkwithUsersAndApi
+
+  huddle-redis-service:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - testNetworkwithUsersAndApi
+
+  users-service:
+    image: users:0.1
+    env_file:
+      - ./backend/user_management_service/.env
+    ports:
+      - "7614:7614"
+    depends_on:
+      - users-mysql-db
+      - huddle-redis-service
+    networks:
+      - testNetworkwithUsersAndApi
+
+  admin-service:
+    image: admin-service:0.1
+    ports:
+      - "8931:8931"
+    depends_on:
+      - users-mysql-db
+    networks:
+      - testNetworkwithUsersAndApi
+
+  posts-service:
+    image: posts-service:0.1
+    env_file:
+      - ./backend/posts/.env
+    ports:
+      - "9639:9639"
+    networks:
+      - testNetworkwithUsersAndApi
+
+  chat-service:
+    image: chat-service:0.1
+    env_file:
+      - ./backend/chat/.env
+    ports:
+      - "5236:5236"
+    networks:
+      - testNetworkwithUsersAndApi
+
+  api-gateway-service:
+    image: apigateway:0.1
+    ports:
+      - "5001:5001"
+    networks:
+      - testNetworkwithUsersAndApi
+
+networks:
+  testNetworkwithUsersAndApi:
+    driver: bridge

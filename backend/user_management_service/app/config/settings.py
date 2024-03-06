@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str = os.environ.get("FRONTEND_HOST", 'http://localhost:3000')
 
     # MySQL
-    MYSQL_HOST: str = os.environ.get("MYSQL_HOST", 'localhost')
+    # MYSQL_HOST: str = os.environ.get("MYSQL_HOST", 'localhost')
+    MYSQL_HOST: str = os.environ.get("MYSQL_HOST", 'huddledatingproject-users-mysql-db-1')
     MYSQL_USER: str = os.environ.get("MYSQL_USER", 'root')
     MYSQL_PASS: str = os.environ.get("MYSQL_PASSWORD", 'secret')
     MYSQL_PORT: int = int(os.environ.get("MYSQL_PORT", 3306))
@@ -30,6 +31,9 @@ class Settings(BaseSettings):
 
     # Secret Key
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "secret")
+    
+    # Kafka
+    KAFKA_SERVER: str = os.environ.get("KAFKA_SERVER", 'kafka')
     
     # JWT
     JWT_SECRET: str = os.environ.get("JWT_SECRET")

@@ -75,6 +75,7 @@ def get_chatroom_messages(chatroom_name):
     
     room = Room.objects.filter(room_name=chatroom_name).first()
     if not room:
+        logger.error(f"Chatroom doesn't exist")
         return jsonify({'error': "Chatroom doesn't exist"}), 404
     try:
         messages = Message.objects.filter(chatroom=room).order_by('sent_at')

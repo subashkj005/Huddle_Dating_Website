@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  huddle-user:
+    container_name: huddle-user-service
+    image: subashkj005/huddle-dating:user-service
+    ports:
+      - "7614:7614"

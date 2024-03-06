@@ -21,7 +21,7 @@ allowed_origins = [settings.FRONTEND_HOST, settings.FRONTEND_HOST_ADDRESS]
 
 # Cors headers
 cors = CORS(app, 
-            resources={r"/*": {"origins": allowed_origins}},
+            resources={r"/*": {"origins": "*"}},
             methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
             supports_credentials=True,
             allow_headers=['Content-Type']
@@ -38,6 +38,6 @@ init_app(app=app)
 
 if __name__ == '__main__':
     bus.run()
-    app.run(port=9639, debug=True,  use_reloader=True)
+    app.run(host='0.0.0.0', port=9639, debug=True, use_reloader=True)
 
 

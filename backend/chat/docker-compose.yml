@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  huddle-chat:
+    container_name: huddle-chat-services
+    image: subashkj005/huddle-dating:chat-service
+    ports:
+      - "5236:5236"

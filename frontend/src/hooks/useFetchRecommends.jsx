@@ -11,6 +11,7 @@ function useFetchRecommends() {
   const [account, setAccount] = useState([]);
   const batchNumber = useRef(1) //Initially it will be 1, when increment it will act as desired value
   const [isLimitReached, setLimitReached] = useState(false)
+  const [fetchCompleted, setFetchCompleted] = useState(false)
   const [accountIndex, setAccountIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.logUser.user.id);
@@ -49,7 +50,9 @@ function useFetchRecommends() {
     
     const fetchData = async () => {
       try {
+        setFetchCompleted(false)
         const recommendations = await getRecommendations();
+        setFetchCompleted(true)
 
         setData(recommendations);
         setAccount(recommendations && recommendations[0]);
@@ -84,7 +87,8 @@ function useFetchRecommends() {
     accountIndex,
     setAccountIndex,
     loading,
-    fetchMoreUsers]
+    fetchMoreUsers,
+    fetchCompleted]
 }
 
 export default useFetchRecommends;

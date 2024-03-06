@@ -2,13 +2,17 @@ import json
 from kafka import KafkaProducer
 from kafka.errors import KafkaError, NoBrokersAvailable
 from app.logger.config import logger
+from app.config.settings import get_settings
+
+settings = get_settings()
 
 try:
     producer = KafkaProducer(
-        bootstrap_servers='localhost:9093',
+        bootstrap_servers=settings.KAFKA_SERVER,
         key_serializer=lambda k: str(k).encode('utf-8'),
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
+    logger.info('===== Connected with Kafka server =====')
 except NoBrokersAvailable:
     logger.error('No brokers are available to establish a connection')
 except KafkaError as e:

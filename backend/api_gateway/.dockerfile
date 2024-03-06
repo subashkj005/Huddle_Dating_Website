@@ -1,11 +1,13 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
-ENV REDIS_HOST=localhost
+ENV REDIS_HOST=huddle-redis-service
 ENV REDIS_PORT=6379
 
 WORKDIR /app
 
 COPY . /app
+
+COPY .env .
 
 RUN pip install --no-cache-dir -r requirements.txt
 

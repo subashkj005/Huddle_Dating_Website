@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  post-service:
+    container_name: huddle-post-service
+    image: subashkj005/huddle-dating:posts-service
+    ports:
+      - "9639:9639"
+    volumes:
+      - ./media:/app/media
+
+  redis-service:
+    container_name: huddle-redis
+    image: redis:latest
+    ports:
+      - "6379:6379"

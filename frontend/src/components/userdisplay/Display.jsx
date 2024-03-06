@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { RiVerifiedBadgeFill } from "@remixicon/react";
+import { BsStars } from "react-icons/bs";
 import { FaQuoteRight } from "react-icons/fa6";
 import { Button, Tooltip } from "@nextui-org/react";
 import Drinks from "../badges/Drinks";
@@ -8,12 +9,16 @@ import Smoking from "../badges/Smoking";
 import Workout from "../badges/Workout";
 import ZodiacSign from "../badges/ZodiacSign";
 import gradientImage from "../../assets/images/gradient background.jpg";
+import maleDummy from "../../assets/images/male-dummy-image.jpg";
+import femaleDummy from "../../assets/images/female-dummy-image.jpg";
+import nuetralDummy from "../../assets/images/nuetral-dummy-image.jpg";
 import Height from "../badges/Height";
 import Gender from "../badges/Gender";
 import "../../assets/styles/heart.css";
 import "../../assets/styles/carouselsAnimation.css";
 import heart from "../../assets/images/pink_heart.png";
 import loadingBg from "../../assets/images/huddle_loading_bg.jpg";
+import limitBg from "../../assets/images/huddle_limit_bg.jpg";
 import { toast as hottoast } from "react-hot-toast";
 import { MdCancel } from "react-icons/md";
 import { BsLightningFill } from "react-icons/bs";
@@ -37,6 +42,7 @@ function Display() {
     setAccountIndex,
     loading,
     fetchMoreUsers,
+    fetchCompleted,
   ] = useFetchRecommends();
   const [handleLike, handleDislike] = useInterest();
   const [animation, setAnimation] = useState(false);
@@ -165,9 +171,10 @@ function Display() {
           animation ? "animate" : ""
         } relative overflow-hidden flex flex-col overflow-y-hidden w-[68%] h-[94%] rounded-[10px] bg-white shadow-2xl`}
       >
+        {/* Loading screen when fetching users */}
         <div
           className={`loading-div z-20 w-full h-full relative ${
-            data ? "hidden" : ""
+            data.length ? "hidden" : fetchCompleted ? "hidden" : "" 
           }`}
         >
           <div className="rhombus absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -180,18 +187,21 @@ function Display() {
             alt=""
           />
         </div>
+
+        {/* Image for showing the reached limit */}
         <div
-          className={`loading-div z-20 w-full h-full relative`}
+          className={`loading-div z-20 w-full h-full relative ${
+            data.length ? "hidden" : ""
+          }`}
         >
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            
-          </div>
           <img
             className=" object-cover w-screen h-screen"
-            src={loadingBg}
+            src={limitBg}
             alt=""
           />
         </div>
+
+        {/* Background for carousel contents */}
         <img className="blur-3xl" src={gradientImage} alt="" />
 
         <div className=" flex content-between absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[40%] opacity-95 p-4 z-10 rounded">
@@ -228,9 +238,9 @@ function Display() {
             <img
               src={
                 account
-                  ? account.images
+                  ? account?.images?.length
                     ? `${IMAGE_URL}${account?.images[0]}`
-                    : ""
+                    : account?.gender ? account?.gender === 'Male' ? maleDummy : femaleDummy : nuetralDummy
                   : ""
               }
               alt="Image 1"
@@ -261,23 +271,24 @@ function Display() {
             {/* <!-- Text or content items go here --> */}
             <div className="text-content ">
               <h1 className="font-sans font-semibold text-3xl flex items-center justify-center">
-                {account ? account.name : ""} ,
+                {account ? account?.name ? account.name + " ," : "User " : ""}
                 <div
                   className="ml-2 font-bold text-4xl"
                   style={{ fontFamily: "'Chivo', sans-serif" }}
                 >
                   {account?.age ? account.age : ""}
                 </div>
-                <div className="ml-2">
+                <div className={`ml-2 ${account && account.name && account.age ? "" : "hidden"}`}>
                   {<RiVerifiedBadgeFill color="#249ef0" />}
                 </div>
               </h1>
+              <div className={`${account && account.name && account.age ? "hidden" : "flex"} p-1 px-3 text-base font-sans font-medium rounded-full items-center mt-4 bg-sky-300 border-white hover:bg-sky-400`}>New User <BsStars className="ml-1" color="yellow" /> </div>
             </div>
           </div>
         </div>
 
         {/* -------------------About------------------- */}
-        <div className="carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 h-full w-full flex flex-col items-center justify-center">
+        <div className={`carousel-wrapper transition duration-500 ease-in-out absolute top-0 left-0 h-full w-full flex flex-col items-center justify-center`}>
           <div className="mb-6">
             <h3 className="font-sans text-xl font-semibold text-center mb-1">
               About
@@ -297,7 +308,7 @@ function Display() {
             {account?.interests?.smoking && (
               <Smoking value={account.interests.smoking} />
             )}
-            {account?.gender && <Gender value={account.gender} />}
+            {account?.gender && <Gender value={account?.gender} />}
             {account?.interests?.zodiac_sign && (
               <ZodiacSign value={account.interests.zodiac_sign} />
             )}
@@ -314,11 +325,11 @@ function Display() {
             {/*  Image items go here  */}
             <img
               src={
-                account?.images
+                account?.images?.length
                   ? account.images[1]
                     ? `${IMAGE_URL}${account?.images[1]}`
                     : `${IMAGE_URL}${account?.images[0]}`
-                  : ""
+                  : account?.gender ? account?.gender === 'Male' ? maleDummy : femaleDummy : nuetralDummy
               }
               alt="Image 1"
               className="h-[100%] w-[100%] object-cover"
