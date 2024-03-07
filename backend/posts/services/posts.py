@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from utils.save_image import save_image
+from utils.save_base64 import save_base64_image
 from serializers.serializer import CommentSchema, PostSchema
 from models.models import Post, Report, User
 from logger.config import logger
@@ -57,11 +57,11 @@ def create_or_update_user(user):
 
 
 
-def create_post(request):
-    user_id = request.form.get('user_id', None)
-    content = request.form.get('content', None)
-    heading = request.form.get('heading', None)
-    image = request.files.get('image', None)
+def create_post(post):
+    user_id = post.get('user_id', None)
+    content = post.get('content', None)
+    heading = post.get('heading', None)
+    image = post.get('image', None)
     
     try:
         user = User.objects.filter(user_id=user_id).first()
@@ -70,7 +70,7 @@ def create_post(request):
             post_schema = PostSchema()
             if image:
                 print('Image true')
-                destination, error =save_image(image, user_id)
+                destination, error =save_base64_image(image, user_id)
                 
                 
                 if destination:

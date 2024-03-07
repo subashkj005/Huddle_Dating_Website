@@ -1,19 +1,15 @@
 import uuid
 from logger.config import logger
 
+
 def save_image(post_image, user_id):
 
     ALLOWED_EXTENSIONS = ['jpg', 'png', 'jpeg']
     MAX_IMAGE_SIZE = 5242880  # 5 MB
     error = None
-    
 
     try:
-        print('type of image = ', type(post_image))
-        print(dir(post_image))
-        print(vars(post_image))
-        
-        
+
         file = post_image
         filename = post_image.filename
         extension = filename.split(".")[-1]
@@ -29,11 +25,6 @@ def save_image(post_image, user_id):
             logger.error(error)
             return None, error
 
-        # if post_image.size > MAX_IMAGE_SIZE:
-        #     error = f"Image size should be below 5MB"
-        #     logger.error(error)
-        #     return None, error
-
         unique_filename = f"{uuid.uuid4()}-{filename}"
         destination = f"media/posts_images/{user_id}-{unique_filename}"
 
@@ -46,5 +37,5 @@ def save_image(post_image, user_id):
 
     except Exception as e:
         logger.error(f"Error saving image: {e}")
- 
+
         return None, error

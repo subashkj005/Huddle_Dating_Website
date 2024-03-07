@@ -1,22 +1,24 @@
-PUBLIC_SERVICE = "public-service"
-USER_SERVICE = "user-service"
+from config.service_address import USERS_SERVICE, ADMIN_SERVICE,\
+                                    POSTS_SERVICE, CHAT_SERVICE
 
 
 public_services = {
-    "public": "http://34.31.212.173:7614/",
-    "admin_auth": "http://35.223.178.123:8931/",
+    "public": USERS_SERVICE,
+    "admin_auth": ADMIN_SERVICE,
+    "user_images": USERS_SERVICE,
+    "posts_images": POSTS_SERVICE,
 }
 
 
 protected_services = {
-    "users": "http://34.31.212.173:7614/",
-    "chat": "http://34.122.10.212:5236/",
-    "posts": "http://35.193.63.12:9639/",
+    "users": USERS_SERVICE,
+    "chat": CHAT_SERVICE,
+    "posts": POSTS_SERVICE,
     
     # Admin
-    "admin": "http://35.223.178.123:8931/",
-    "admin_access": "http://34.31.212.173:7614/",
-    "admin_post": "http://35.193.63.12:9639/",
+    "admin": ADMIN_SERVICE,
+    "admin_access": USERS_SERVICE,
+    "admin_post": POSTS_SERVICE,
 }
 
 

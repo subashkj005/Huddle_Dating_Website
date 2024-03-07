@@ -5,8 +5,10 @@ from services.logger import logger
 
 
 def construct_url(path):
+    
     service_name = path.split('/')[0]
-    # return get_service_url(service_name) + path.split('/', 1)[1]
+    if service_name == "posts_images" or service_name == "user_images":
+        return get_service_url(service_name) + path.split('/', 1)[1]
     return get_service_url(service_name) + path
 
 

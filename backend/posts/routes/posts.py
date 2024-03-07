@@ -9,7 +9,8 @@ post_route = Blueprint('posts', __name__)
 
 @post_route.post('/create_post')
 def create_new_post():
-    return create_post(request) 
+    post = request.get_json()
+    return create_post(post) 
 
 
 @post_route.post('/create_user')
