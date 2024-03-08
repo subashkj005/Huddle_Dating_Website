@@ -7,6 +7,11 @@ from services.logger import logger
 bp = Blueprint('routes', __name__)
 
 
+@bp.route('/health', methods=['GET'])
+def server_health_check():
+    return "Working", 200
+
+
 @bp.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'])
 def gateway(path):
     

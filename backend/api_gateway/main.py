@@ -21,7 +21,7 @@ cors = CORS(app,
 app.register_blueprint(routes_bp)
 
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET'])
 def status():
     return "Working"
 
